@@ -589,28 +589,100 @@
         }
 
         function applyTheme() {
-            const html = document.documentElement;
-            const icon = document.getElementById('theme-icon');
-            const iconMobile = document.getElementById('theme-icon-mobile');
-            const text = document.getElementById('theme-text');
-            if (state.theme === 'dark') {
-                html.classList.add('dark');
-                if (icon) icon.className = 'fas fa-sun w-6 text-center';
-                if (iconMobile) iconMobile.className = 'fas fa-sun text-lg';
-                if (text) text.innerText = 'Modo Claro';
-            } else {
-                html.classList.remove('dark');
-                if (icon) icon.className = 'fas fa-moon w-6 text-center';
-                if (iconMobile) iconMobile.className = 'fas fa-moon text-lg';
-                if (text) text.innerText = 'Modo Escuro';
-            }
-        }
+    const html = document.documentElement;
+    const icon = document.getElementById('theme-icon');
+    const iconMobile = document.getElementById('theme-icon-mobile');
+    const text = document.getElementById('theme-text');
 
-        function toggleTheme() {
-            state.theme = state.theme === 'dark' ? 'light' : 'dark';
-            localStorage.setItem('theme', state.theme);
-            applyTheme();
+    // Garante que a classe 'dark' seja aplicada/removida corretamente
+    if (state.theme === 'dark') {
+        html.classList.add('dark');
+        if (icon) icon.className = 'fas fa-sun w-6 text-center';
+        if (iconMobile) iconMobile.className = 'fas fa-sun text-lg';
+        if (text) text.innerText = 'Modo Claro';
+    } else {
+        html.classList.remove('dark');
+        if (icon) icon.className = 'fas fa-moon w-6 text-center';
+        if (iconMobile) iconMobile.className = 'fas fa-moon text-lg';
+        if (text) text.innerText = 'Modo Escuro';
+    }
+
+    // Salva no localStorage para persistência
+    localStorage.setItem('theme', state.theme);
+}
+
+function toggleTheme() {
+    // Alterna o tema
+    state.theme = state.theme === 'dark' ? 'light' : 'dark';
+    applyTheme();
+}
+
+function setupExpandableDescription(element, maxHeight = 80) {
+    if (!element) return;
+    
+    // Remove qualquer botão anterior
+    const oldBtn = element.parentElement.querySelector('.expand-desc-btn');
+    if (oldBtn) oldBtn.remove();
+    
+    // Reseta estilos
+    element.style.maxHeight = 'none';
+    element.style.overflow = 'visible';
+    element.classList.remove('relative');
+    
+    // Verifica se o texto é maior que a altura máxima
+    if (element.scrollHeight <= maxHeight) return;
+    
+    // Cria o botão de expandir
+    const btn = document.createElement('button');
+    btn.className = 'expand-desc-btn text-yt-brand font-bold text-xs mt-1 hover:underline';
+    btn.innerText = 'Mostrar mais';
+    
+    // Define o estado inicial (recolhido)
+    let isExpanded = false;
+    element.style.maxHeight = maxHeight + 'px';
+    element.style.overflow = 'hidden';
+    element.style.position = 'relative';
+    
+    // Adiciona uma máscara de gradiente (opcional, para estética)
+    const mask = document.createElement('div');
+    mask.className = 'desc-mask';
+    mask.style.cssText = `
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        height: 40px;
+        background: linear-gradient(transparent, var(--mask-bg, #f3f4f6));
+        pointer-events: none;
+    `;
+    // Ajusta cor de fundo conforme tema (dark/light)
+    if (document.documentElement.classList.contains('dark')) {
+        mask.style.setProperty('--mask-bg', '#272727');
+    } else {
+        mask.style.setProperty('--mask-bg', '#f3f4f6');
+    }
+    element.appendChild(mask);
+    
+    // Insere o botão após o elemento
+    element.parentElement.appendChild(btn);
+    
+    // Evento de clique
+    btn.addEventListener('click', () => {
+        isExpanded = !isExpanded;
+        if (isExpanded) {
+            element.style.maxHeight = element.scrollHeight + 'px';
+            element.style.overflow = 'visible';
+            btn.innerText = 'Mostrar menos';
+            if (mask) mask.style.display = 'none';
+        } else {
+            element.style.maxHeight = maxHeight + 'px';
+            element.style.overflow = 'hidden';
+            btn.innerText = 'Mostrar mais';
+            if (mask) mask.style.display = 'block';
         }
+    });
+}
+
 
         // =============================================
         // AUTENTICAÇÃO
@@ -1031,8 +1103,10 @@
                 const initial = v.uploaderName ? v.uploaderName[0].toUpperCase() : 'U';
                 return `
                 <div class="group cursor-pointer fade-in" onclick="openVideo('${v.id}')">
+                
                     <div class="relative aspect-video bg-gray-200 dark:bg-yt-darkHover rounded-xl overflow-hidden mb-3 shadow-sm group-hover:shadow-md transition-all duration-300">
                         <video class="video-thumbnail" src="${v.url}#t=1" preload="metadata"></video>
+                        
                         <div class="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors flex items-center justify-center">
                             <i class="fas fa-play text-white opacity-0 group-hover:opacity-100 transition-opacity text-2xl drop-shadow-lg"></i>
                         </div>
