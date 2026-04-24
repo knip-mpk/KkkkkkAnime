@@ -9,69 +9,44 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     
     <script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/12.12.1/firebase-app.js";
-    import { 
-        getFirestore, collection, addDoc, getDocs, updateDoc, deleteDoc, doc, query, where, orderBy, limit, serverTimestamp, arrayUnion, arrayRemove, increment, getDoc, setDoc 
-    } from "https://www.gstatic.com/firebasejs/12.12.1/firebase-firestore.js";
-    import { 
-        getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, updateProfile, onAuthStateChanged, GoogleAuthProvider, signInWithPopup 
-    } from "https://www.gstatic.com/firebasejs/12.12.1/firebase-auth.js";
-    import { getStorage } from "https://www.gstatic.com/firebasejs/12.12.1/firebase-storage.js";
-    
-    const firebaseConfig = {
-        apiKey: "AIzaSyDAw0YMvJALs2oD6yVZn1a94vu1PpnClsI",
-        authDomain: "vibtube-927d7.firebaseapp.com",
-        projectId: "vibtube-927d7",
-        storageBucket: "vibtube-927d7.firebasestorage.app",
-        messagingSenderId: "81266811806",
-        appId: "1:81266811806:web:153feb3c86bd28b8e62c8f"
-    };
-    
-    const app = initializeApp(firebaseConfig);
-    window.db = getFirestore(app);
-    window.auth = getAuth(app);
-    window.storage = getStorage(app);
-    
-    // Expor funções de autenticação globalmente
-    window.GoogleAuthProvider = GoogleAuthProvider;
-    window.signInWithPopup = signInWithPopup;
-    window.onAuthStateChanged = onAuthStateChanged;
-    window.createUserWithEmailAndPassword = createUserWithEmailAndPassword;
-    window.signInWithEmailAndPassword = signInWithEmailAndPassword;
-    window.signOut = signOut;
-    window.updateProfile = updateProfile;
-    
-    window.firestoreHelpers = {
-        collection, addDoc, getDocs, updateDoc, deleteDoc, doc, query, where, orderBy, limit, serverTimestamp, arrayUnion, arrayRemove, increment, getDoc, setDoc
-    };
-    
-    console.log('Firebase inicializado com sucesso (vibtube-927d7)');
-</script>
-
-    <script>
-        window.addEventListener('DOMContentLoaded', () => {
-            if (window.tailwind) {
-                window.tailwind.config = {
-                    darkMode: 'class',
-                    theme: {
-                        extend: {
-                            colors: {
-                                yt: {
-                                    dark: '#0f0f0f',
-                                    darkHover: '#272727',
-                                    darkBorder: '#3f3f3f',
-                                    light: '#ffffff',
-                                    lightHover: '#f2f2f2',
-                                    lightBorder: '#e5e5e5',
-                                    brand: '#f97316'
-                                }
-                            }
-                        }
-                    }
-                };
-            }
-        });
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/12.12.1/firebase-app.js";
+        import { 
+            getFirestore, collection, addDoc, getDocs, updateDoc, deleteDoc, doc, query, where, orderBy, limit, serverTimestamp, arrayUnion, arrayRemove, increment, getDoc, setDoc 
+        } from "https://www.gstatic.com/firebasejs/12.12.1/firebase-firestore.js";
+        import { 
+            getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, updateProfile, onAuthStateChanged, GoogleAuthProvider, signInWithPopup 
+        } from "https://www.gstatic.com/firebasejs/12.12.1/firebase-auth.js";
+        import { getStorage } from "https://www.gstatic.com/firebasejs/12.12.1/firebase-storage.js";
+        
+        const firebaseConfig = {
+            apiKey: "AIzaSyDAw0YMvJALs2oD6yVZn1a94vu1PpnClsI",
+            authDomain: "vibtube-927d7.firebaseapp.com",
+            projectId: "vibtube-927d7",
+            storageBucket: "vibtube-927d7.firebasestorage.app",
+            messagingSenderId: "81266811806",
+            appId: "1:81266811806:web:153feb3c86bd28b8e62c8f"
+        };
+        
+        const app = initializeApp(firebaseConfig);
+        window.db = getFirestore(app);
+        window.auth = getAuth(app);
+        window.storage = getStorage(app);
+        
+        window.GoogleAuthProvider = GoogleAuthProvider;
+        window.signInWithPopup = signInWithPopup;
+        window.onAuthStateChanged = onAuthStateChanged;
+        window.createUserWithEmailAndPassword = createUserWithEmailAndPassword;
+        window.signInWithEmailAndPassword = signInWithEmailAndPassword;
+        window.signOut = signOut;
+        window.updateProfile = updateProfile;
+        
+        window.firestoreHelpers = {
+            collection, addDoc, getDocs, updateDoc, deleteDoc, doc, query, where, orderBy, limit, serverTimestamp, arrayUnion, arrayRemove, increment, getDoc, setDoc
+        };
+        
+        console.log('Firebase inicializado com sucesso (vibtube-927d7)');
     </script>
+
     <style>
         ::-webkit-scrollbar { width: 6px; height: 6px; }
         ::-webkit-scrollbar-track { background: transparent; }
@@ -208,7 +183,6 @@
             border-color: #f97316;
         }
         
-        /* Estilos Novos para Auth */
         .google-btn {
             background: white;
             color: #374151;
@@ -256,7 +230,7 @@
                 <i class="fas fa-plus text-xs"></i>
                 <span>Criar</span>
             </button>
-            <div id="user-avatar" class="w-8 h-8 sm:w-9 sm:h-9 rounded-full bg-gradient-to-br from-orange-400 to-yt-brand text-white flex items-center justify-center font-bold shadow-md cursor-pointer hover:scale-105 transition text-sm sm:text-base" onclick="navigateTo('profile')">
+            <div id="user-avatar" class="w-8 h-8 sm:w-9 sm:h-9 rounded-full bg-gradient-to-br from-orange-400 to-yt-brand text-white flex items-center justify-center font-bold shadow-md cursor-pointer hover:scale-105 transition text-sm sm:text-base overflow-hidden" onclick="handleAvatarClick()">
                 <i class="fas fa-user"></i>
             </div>
         </div>
@@ -306,7 +280,7 @@
                 <div class="flex flex-col lg:flex-row lg:gap-6 lg:p-6">
                     <div class="lg:w-[70%]">
                         <div class="video-player-container aspect-video" id="player-container">
-                            <video id="html-player" playsinline webkit-playsinline class="w-full h-full"></video>
+                            <video id="html-player" playsinline webkit-playsinline class="w-full h-full" onclick="togglePlay()"></video>
                             <div class="custom-controls" id="custom-controls">
                                 <div class="progress-container" id="progress-container" onclick="seekVideo(event)" ontouchstart="seekVideo(event)">
                                     <div class="progress-bar" id="progress-bar" style="width: 0%"></div>
@@ -316,9 +290,14 @@
                                         <button class="control-btn" onclick="togglePlay()" id="play-btn"><i class="fas fa-pause text-sm sm:text-base"></i></button>
                                         <button class="control-btn hidden xs:flex" onclick="skipTime(-10)"><i class="fas fa-rotate-left text-xs sm:text-sm"></i><span class="text-[10px] sm:text-xs ml-1">10s</span></button>
                                         <button class="control-btn hidden xs:flex" onclick="skipTime(10)"><span class="text-[10px] sm:text-xs mr-1">10s</span><i class="fas fa-rotate-right text-xs sm:text-sm"></i></button>
+                                        <div class="control-btn group relative" id="volume-btn">
+                                            <i class="fas fa-volume-up text-sm"></i>
+                                            <input type="range" id="volume-slider" min="0" max="1" step="0.05" value="1" class="hidden group-hover:block absolute bottom-full left-1/2 -translate-x-1/2 w-20 h-1 accent-yt-brand" oninput="changeVolume(this.value)">
+                                        </div>
                                         <span class="text-white text-[10px] sm:text-xs ml-1" id="time-display">0:00 / 0:00</span>
                                     </div>
                                     <div class="flex items-center gap-1 sm:gap-2">
+                                        <button class="control-btn" onclick="togglePiP()" title="Picture-in-Picture"><i class="fas fa-window-restore text-xs sm:text-sm"></i></button>
                                         <button class="control-btn" onclick="changePlaybackSpeed()" id="speed-btn"><span class="text-[10px] sm:text-xs font-bold">1x</span></button>
                                         <button class="control-btn" onclick="toggleFullscreen()"><i class="fas fa-expand text-xs sm:text-sm"></i></button>
                                     </div>
@@ -332,7 +311,7 @@
                             </div>
                             <div class="flex flex-col sm:flex-row sm:items-center justify-between mt-3 sm:mt-4 gap-3">
                                 <div class="flex items-center gap-2 sm:gap-3">
-                                    <div class="w-9 h-9 sm:w-10 sm:h-10 rounded-full bg-gradient-to-br from-orange-400 to-yt-brand flex items-center justify-center text-white font-bold text-sm flex-shrink-0" id="player-uploader-avatar">U</div>
+                                    <div class="w-9 h-9 sm:w-10 sm:h-10 rounded-full bg-gradient-to-br from-orange-400 to-yt-brand flex items-center justify-center text-white font-bold text-sm flex-shrink-0 overflow-hidden" id="player-uploader-avatar">U</div>
                                     <div class="min-w-0">
                                         <p class="font-bold text-sm sm:text-base truncate" id="player-uploader-name">Uploader</p>
                                         <p class="text-[10px] sm:text-xs text-gray-500" id="player-uploader-subs">0 inscritos</p>
@@ -347,8 +326,8 @@
                                             <i class="fas fa-thumbs-up"></i> <span id="likes-count">0</span>
                                         </button>
                                         <div class="w-px bg-gray-300 dark:bg-gray-600"></div>
-                                        <button onclick="toggleDislike()" class="px-3 sm:px-4 py-2 sm:py-2.5 hover:bg-gray-300 dark:hover:bg-yt-darkBorder transition">
-                                            <i class="fas fa-thumbs-down text-xs sm:text-sm"></i>
+                                        <button id="btn-dislike" onclick="toggleDislike()" class="px-3 sm:px-4 py-2 sm:py-2.5 hover:bg-gray-300 dark:hover:bg-yt-darkBorder transition">
+                                            <i class="fas fa-thumbs-down text-xs sm:text-sm"></i> <span id="dislikes-count">0</span>
                                         </button>
                                     </div>
                                     <button onclick="shareVideo()" class="bg-gray-200 dark:bg-yt-darkHover px-3 sm:px-4 py-2 sm:py-2.5 rounded-full hover:bg-gray-300 dark:hover:bg-yt-darkBorder transition flex items-center gap-1.5 text-xs sm:text-sm font-medium">
@@ -445,6 +424,18 @@
                     <label class="block text-[10px] sm:text-xs font-bold text-gray-600 dark:text-gray-400 mb-2 uppercase tracking-wider"><i class="fas fa-tags text-yt-brand mr-1"></i> Categorias</label>
                     <div class="flex flex-wrap gap-2" id="up-categories"></div>
                 </div>
+                <div class="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-xl p-4 text-xs text-gray-700 dark:text-gray-300 space-y-2">
+                    <p class="font-bold text-red-600 dark:text-red-400 flex items-center gap-1"><i class="fas fa-exclamation-triangle"></i> Regras de publicação</p>
+                    <ul class="list-disc list-inside space-y-1">
+                        <li>Não é permitido conteúdo adulto real (apenas animação, mangá, hentai, etc.).</li>
+                        <li>Proibido postar cenas de gore explícito ou violência gratuita.</li>
+                        <li>Respeite os direitos autorais e a comunidade.</li>
+                    </ul>
+                    <label class="flex items-start gap-2 cursor-pointer mt-2">
+                        <input type="checkbox" id="agree-terms" class="mt-0.5 w-4 h-4 accent-yt-brand">
+                        <span class="font-medium">Li e concordo com as regras de upload</span>
+                    </label>
+                </div>
             </div>
             <div class="p-4 sm:p-5 bg-white dark:bg-yt-dark border-t border-yt-lightBorder dark:border-yt-darkBorder flex justify-end gap-2 sm:gap-3 sticky bottom-0">
                 <button onclick="toggleUploadModal(false)" class="px-4 sm:px-6 py-2 sm:py-2.5 rounded-full font-bold text-xs sm:text-sm hover:bg-gray-200 dark:hover:bg-yt-darkHover transition active:scale-95">Cancelar</button>
@@ -512,6 +503,30 @@
         </div>
     </div>
 
+    <!-- Modal de Edição de Perfil (aberto pelo avatar) -->
+    <div id="modal-edit-profile" class="fixed inset-0 z-[101] hidden flex items-center justify-center p-4">
+        <div class="fixed inset-0 bg-black/70" onclick="closeEditProfileModal()"></div>
+        <div class="bg-white dark:bg-yt-dark w-full max-w-md rounded-2xl p-6 shadow-2xl z-10 space-y-4">
+            <h3 class="text-lg font-bold">Editar Perfil</h3>
+            <div>
+                <label class="text-xs font-bold uppercase text-gray-500">Nome de exibição</label>
+                <input type="text" id="edit-profile-name" class="auth-input" value="">
+            </div>
+            <div>
+                <label class="text-xs font-bold uppercase text-gray-500">URL da Foto de Perfil</label>
+                <input type="text" id="edit-profile-photo" class="auth-input" value="" placeholder="https://...">
+            </div>
+            <div>
+                <label class="text-xs font-bold uppercase text-gray-500">Bio</label>
+                <textarea id="edit-profile-bio" class="auth-input" rows="2"></textarea>
+            </div>
+            <div class="flex justify-end gap-2">
+                <button onclick="closeEditProfileModal()" class="px-4 py-2 rounded-full font-bold text-sm hover:bg-gray-200 dark:hover:bg-yt-darkHover transition">Cancelar</button>
+                <button onclick="saveProfile()" class="bg-yt-brand text-white px-6 py-2 rounded-full font-bold text-sm">Salvar</button>
+            </div>
+        </div>
+    </div>
+
     <div id="toast" class="fixed bottom-20 sm:bottom-24 left-1/2 transform -translate-x-1/2 bg-gray-900/95 text-white px-4 sm:px-6 py-3 sm:py-3.5 rounded-full shadow-2xl z-[60] flex items-center gap-2 sm:gap-3 transition-all duration-400 opacity-0 translate-y-10 pointer-events-none border border-white/10 backdrop-blur-md">
         <i id="toast-icon" class="fas fa-check-circle text-green-400 text-sm sm:text-base"></i>
         <span id="toast-msg" class="text-xs sm:text-sm font-semibold whitespace-nowrap"></span>
@@ -532,23 +547,39 @@
             currentVideoData: null,
             allVideos: [],
             following: [],
+            likedVideos: [],
+            dislikedVideos: [],
+            userProfile: null,
             categories: [
                 { id: 'anime', name: 'Anime', icon: 'fas fa-dragon' },
                 { id: 'amv', name: 'AMV', icon: 'fas fa-music' },
                 { id: 'tutorial', name: 'Tutoriais', icon: 'fas fa-graduation-cap' },
                 { id: 'review', name: 'Reviews', icon: 'fas fa-star' },
                 { id: 'live', name: 'Lives', icon: 'fas fa-broadcast-tower' },
-                { id: 'news', name: 'Notícias', icon: 'fas fa-newspaper' }
+                { id: 'news', name: 'Notícias', icon: 'fas fa-newspaper' },
+                { id: 'mais18', name: '+18 Animes', icon: 'fas fa-exclamation-triangle' }
             ]
         };
 
-        // Funções de Inicialização
+        // =============================================
+        // INICIALIZAÇÃO
+        // =============================================
         async function init() {
+            silenceVideoAbortErrors();
             setupTheme();
             setupAuthListener();
             renderCategories();
-            loadVideos();
+            await loadVideos();
             setupPlayerListeners();
+        }
+
+        function silenceVideoAbortErrors() {
+            document.addEventListener('error', function(e) {
+                if (e.target && e.target.tagName === 'VIDEO' && e.target.error && e.target.error.code === 20) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                }
+            }, true);
         }
 
         function setupTheme() {
@@ -562,17 +593,16 @@
             const icon = document.getElementById('theme-icon');
             const iconMobile = document.getElementById('theme-icon-mobile');
             const text = document.getElementById('theme-text');
-
             if (state.theme === 'dark') {
                 html.classList.add('dark');
-                icon.className = 'fas fa-sun w-6 text-center';
-                iconMobile.className = 'fas fa-sun text-lg';
-                text.innerText = 'Modo Claro';
+                if (icon) icon.className = 'fas fa-sun w-6 text-center';
+                if (iconMobile) iconMobile.className = 'fas fa-sun text-lg';
+                if (text) text.innerText = 'Modo Claro';
             } else {
                 html.classList.remove('dark');
-                icon.className = 'fas fa-moon w-6 text-center';
-                iconMobile.className = 'fas fa-moon text-lg';
-                text.innerText = 'Modo Escuro';
+                if (icon) icon.className = 'fas fa-moon w-6 text-center';
+                if (iconMobile) iconMobile.className = 'fas fa-moon text-lg';
+                if (text) text.innerText = 'Modo Escuro';
             }
         }
 
@@ -582,30 +612,101 @@
             applyTheme();
         }
 
+        // =============================================
+        // AUTENTICAÇÃO
+        // =============================================
         function setupAuthListener() {
-            window.auth.onAuthStateChanged(user => {
+            onAuthStateChanged(window.auth, async (user) => {
                 state.currentUser = user;
+                if (user) {
+                    await loadUserProfile();
+                    await loadFollowing();
+                    await loadLikesAndDislikes();
+                } else {
+                    state.userProfile = null;
+                    state.following = [];
+                    state.likedVideos = [];
+                    state.dislikedVideos = [];
+                }
                 updateAuthUI();
-                if (user) loadFollowing();
+                if (document.getElementById('page-profile').classList.contains('active')) renderProfile();
+                if (document.getElementById('page-auth').classList.contains('active')) renderAuthPage();
             });
+        }
+
+        async function loadUserProfile() {
+            if (!state.currentUser) return;
+            try {
+                const { getDoc, doc } = window.firestoreHelpers;
+                const snap = await getDoc(doc(window.db, 'users', state.currentUser.uid));
+                if (snap.exists()) {
+                    state.userProfile = snap.data();
+                } else {
+                    state.userProfile = {
+                        displayName: state.currentUser.displayName || '',
+                        photoURL: state.currentUser.photoURL || '',
+                        bio: '',
+                        createdAt: new Date()
+                    };
+                    await window.firestoreHelpers.setDoc(doc(window.db, 'users', state.currentUser.uid), state.userProfile);
+                }
+            } catch (e) {
+                console.error('Erro ao carregar perfil:', e);
+                state.userProfile = {
+                    displayName: state.currentUser.displayName || '',
+                    photoURL: state.currentUser.photoURL || '',
+                    bio: '',
+                    createdAt: new Date()
+                };
+            }
+        }
+
+        async function loadFollowing() {
+            if (!state.currentUser) return;
+            try {
+                const q = window.firestoreHelpers.query(
+                    window.firestoreHelpers.collection(window.db, 'follows'),
+                    window.firestoreHelpers.where('followerId', '==', state.currentUser.uid)
+                );
+                const snap = await window.firestoreHelpers.getDocs(q);
+                state.following = snap.docs.map(d => d.data().followedId);
+            } catch (e) {
+                state.following = [];
+            }
+            updateFollowButton();
+        }
+
+        async function loadLikesAndDislikes() {
+            if (!state.currentUser) return;
+            try {
+                const { getDoc, doc } = window.firestoreHelpers;
+                const snap = await getDoc(doc(window.db, 'users', state.currentUser.uid));
+                if (snap.exists()) {
+                    const data = snap.data();
+                    state.likedVideos = data.likedVideos || [];
+                    state.dislikedVideos = data.dislikedVideos || [];
+                }
+            } catch (e) {
+                state.likedVideos = [];
+                state.dislikedVideos = [];
+            }
         }
 
         function updateAuthUI() {
             const sidebarSection = document.getElementById('sidebar-auth-section');
             const avatar = document.getElementById('user-avatar');
-
             if (state.currentUser) {
-                avatar.innerHTML = state.currentUser.photoURL 
-                    ? `<img src="${state.currentUser.photoURL}" class="w-full h-full rounded-full object-cover">`
-                    : state.currentUser.displayName ? state.currentUser.displayName[0].toUpperCase() : 'U';
-                
+                const photo = state.userProfile?.photoURL || state.currentUser.photoURL;
+                avatar.innerHTML = photo 
+                    ? `<img src="${photo}" class="w-full h-full rounded-full object-cover">`
+                    : (state.currentUser.displayName ? state.currentUser.displayName[0].toUpperCase() : 'U');
                 sidebarSection.innerHTML = `
                     <div class="px-6 py-2 flex items-center gap-3">
                         <div class="w-8 h-8 rounded-full bg-yt-brand flex items-center justify-center text-white font-bold overflow-hidden">
-                            ${state.currentUser.photoURL ? `<img src="${state.currentUser.photoURL}" class="w-full h-full object-cover">` : (state.currentUser.displayName ? state.currentUser.displayName[0] : 'U')}
+                            ${photo ? `<img src="${photo}" class="w-full h-full object-cover">` : (state.currentUser.displayName ? state.currentUser.displayName[0] : 'U')}
                         </div>
                         <div class="min-w-0">
-                            <p class="text-sm font-bold truncate">${state.currentUser.displayName || 'Usuário'}</p>
+                            <p class="text-sm font-bold truncate">${state.userProfile?.displayName || state.currentUser.displayName || 'Usuário'}</p>
                             <button onclick="handleLogout()" class="text-[10px] text-yt-brand hover:underline font-bold uppercase tracking-wider">Sair da conta</button>
                         </div>
                     </div>
@@ -621,40 +722,230 @@
                     </div>
                 `;
             }
-            
-            if (document.getElementById('page-auth').classList.contains('active')) renderAuthPage();
-            if (document.getElementById('page-profile').classList.contains('active')) renderProfile();
         }
 
-        // Navegação
-        function navigateTo(pageId, data = null) {
-            document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
-            document.getElementById(`page-${pageId}`).classList.add('active');
-            window.scrollTo(0, 0);
+        function handleAvatarClick() {
+            if (!state.currentUser) {
+                navigateTo('auth');
+                return;
+            }
+            // Abre modal de edição de perfil
+            openEditProfileModal();
+        }
 
-            // Atualiza links da sidebar/footer
-            document.querySelectorAll(`[data-page]`).forEach(link => {
-                const isActive = link.getAttribute('data-page') === pageId;
-                link.classList.toggle('text-yt-brand', isActive);
-                if (!link.classList.contains('flex-col')) { // Sidebar links
-                    link.classList.toggle('bg-yt-lightHover', isActive);
-                    link.classList.toggle('dark:bg-yt-darkHover', isActive);
+        function renderAuthPage(isRegister = false) {
+            const content = document.getElementById('auth-content');
+            if (isRegister) {
+                content.innerHTML = `
+                    <div class="text-center mb-8">
+                        <i class="fas fa-user-plus text-4xl text-yt-brand mb-4"></i>
+                        <h2 class="text-2xl font-black">Crie sua conta</h2>
+                        <p class="text-gray-500 text-sm mt-1">Junte-se à maior comunidade de streaming!</p>
+                    </div>
+                    <div class="space-y-4">
+                        <button onclick="handleGoogleLogin()" class="google-btn w-full flex items-center justify-center gap-3 py-3 rounded-xl font-bold text-sm">
+                            <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" class="w-5 h-5">
+                            Continuar com Google
+                        </button>
+                        <div class="flex items-center gap-4 my-6"><div class="flex-1 h-px bg-gray-200 dark:bg-yt-darkBorder"></div><span class="text-xs text-gray-400 font-bold uppercase">ou</span><div class="flex-1 h-px bg-gray-200 dark:bg-yt-darkBorder"></div></div>
+                        <div class="space-y-3">
+                            <div class="relative"><i class="fas fa-user absolute left-4 top-1/2 -translate-y-1/2 text-gray-400"></i><input type="text" id="reg-name" placeholder="Como quer ser chamado?" class="auth-input pl-11"></div>
+                            <div class="relative"><i class="fas fa-envelope absolute left-4 top-1/2 -translate-y-1/2 text-gray-400"></i><input type="email" id="reg-email" placeholder="Seu melhor e-mail" class="auth-input pl-11"></div>
+                            <div class="relative"><i class="fas fa-lock absolute left-4 top-1/2 -translate-y-1/2 text-gray-400"></i><input type="password" id="reg-pass" placeholder="Crie uma senha forte" class="auth-input pl-11"></div>
+                        </div>
+                        <button onclick="handleRegister()" class="w-full bg-yt-brand text-white py-3.5 rounded-xl font-black text-sm hover:brightness-110 active:scale-95 transition-all shadow-lg shadow-orange-500/20 mt-2">CRIAR MINHA CONTA</button>
+                        <p class="text-center text-xs text-gray-500 mt-6">Já tem uma conta? <button onclick="renderAuthPage(false)" class="text-yt-brand font-bold hover:underline">Faça login agora</button></p>
+                    </div>
+                `;
+            } else {
+                content.innerHTML = `
+                    <div class="text-center mb-8">
+                        <i class="fas fa-play-circle text-5xl text-yt-brand mb-4"></i>
+                        <h2 class="text-2xl font-black">Bem-vindo de volta!</h2>
+                        <p class="text-gray-500 text-sm mt-1">Sentimos sua falta no AnimeStream.</p>
+                    </div>
+                    <div class="space-y-4">
+                        <button onclick="handleGoogleLogin()" class="google-btn w-full flex items-center justify-center gap-3 py-3 rounded-xl font-bold text-sm">
+                            <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" class="w-5 h-5"> Entrar com Google
+                        </button>
+                        <div class="flex items-center gap-4 my-6"><div class="flex-1 h-px bg-gray-200 dark:bg-yt-darkBorder"></div><span class="text-xs text-gray-400 font-bold uppercase">ou</span><div class="flex-1 h-px bg-gray-200 dark:bg-yt-darkBorder"></div></div>
+                        <div class="space-y-3">
+                            <div class="relative"><i class="fas fa-envelope absolute left-4 top-1/2 -translate-y-1/2 text-gray-400"></i><input type="email" id="login-email" placeholder="E-mail" class="auth-input pl-11"></div>
+                            <div class="relative"><i class="fas fa-lock absolute left-4 top-1/2 -translate-y-1/2 text-gray-400"></i><input type="password" id="login-pass" placeholder="Senha" class="auth-input pl-11"></div>
+                        </div>
+                        <button onclick="handleLogin()" class="w-full bg-yt-brand text-white py-3.5 rounded-xl font-black text-sm hover:brightness-110 active:scale-95 transition-all shadow-lg shadow-orange-500/20 mt-2">ACESSAR CONTA</button>
+                        <div class="flex flex-col items-center gap-4 mt-6">
+                            <button onclick="showToast('Em desenvolvimento', 'info')" class="text-xs text-gray-400 hover:text-yt-brand transition">Esqueceu sua senha?</button>
+                            <p class="text-xs text-gray-500">Não é membro ainda? <button onclick="renderAuthPage(true)" class="text-yt-brand font-bold hover:underline">Cadastre-se grátis</button></p>
+                        </div>
+                    </div>
+                `;
+            }
+        }
+
+        async function handleGoogleLogin() {
+            try {
+                const provider = new window.GoogleAuthProvider();
+                const result = await window.signInWithPopup(window.auth, provider);
+                showToast(`Bem-vindo, ${result.user.displayName}!`);
+                navigateTo('home');
+            } catch (error) {
+                console.error(error);
+                if (error.code === 'auth/popup-closed-by-user') {
+                    showToast('Login cancelado.', 'info');
+                } else {
+                    showToast('Falha no login com Google.', 'error');
                 }
-            });
+            }
+        }
+
+        async function handleRegister() {
+            const name = document.getElementById('reg-name').value.trim();
+            const email = document.getElementById('reg-email').value.trim();
+            const pass = document.getElementById('reg-pass').value;
+            if (!name || !email || !pass) return showToast('Preencha todos os campos.', 'error');
+            try {
+                const cred = await createUserWithEmailAndPassword(window.auth, email, pass);
+                await updateProfile(cred.user, { displayName: name });
+                showToast('Conta criada com sucesso!');
+                navigateTo('home');
+            } catch (error) {
+                const msg = error.code === 'auth/email-already-in-use' ? 'Este email já está cadastrado.' : error.message;
+                showToast('Erro: ' + msg, 'error');
+            }
+        }
+
+        async function handleLogin() {
+            const email = document.getElementById('login-email').value.trim();
+            const pass = document.getElementById('login-pass').value;
+            if (!email || !pass) return showToast('Preencha todos os campos.', 'error');
+            try {
+                await signInWithEmailAndPassword(window.auth, email, pass);
+                showToast('Login realizado!');
+                navigateTo('home');
+            } catch (error) {
+                showToast('E-mail ou senha incorretos.', 'error');
+            }
+        }
+
+        async function handleLogout() {
+            await signOut(window.auth);
+            showToast('Você saiu da conta.', 'info');
+            navigateTo('home');
+        }
+
+        // =============================================
+        // PERFIL
+        // =============================================
+        async function renderProfile() {
+            if (!state.currentUser) { navigateTo('auth'); return; }
+            if (!state.userProfile) await loadUserProfile();
+            const container = document.getElementById('profile-content');
+            const p = state.userProfile || {};
+            const myVideos = state.allVideos.filter(v => v.uploaderId === state.currentUser.uid);
+            container.innerHTML = `
+                <div class="bg-white dark:bg-yt-darkHover rounded-2xl p-6 shadow-xl border border-yt-lightBorder dark:border-yt-darkBorder">
+                    <div class="flex flex-col sm:flex-row items-start sm:items-center gap-4 mb-6">
+                        <div class="w-20 h-20 rounded-full bg-gradient-to-br from-orange-400 to-yt-brand flex items-center justify-center text-white font-bold text-2xl shadow-lg overflow-hidden flex-shrink-0">
+                            ${p.photoURL ? `<img src="${p.photoURL}" class="w-full h-full object-cover">` : (p.displayName ? p.displayName[0].toUpperCase() : 'U')}
+                        </div>
+                        <div>
+                            <h2 class="text-xl font-bold">${p.displayName || 'Usuário'}</h2>
+                            <p class="text-sm text-gray-500">${p.bio || 'Nenhuma bio ainda.'}</p>
+                            <p class="text-xs text-gray-400 mt-1">${myVideos.length} vídeos publicados</p>
+                        </div>
+                        <button onclick="openEditProfileModal()" class="ml-auto bg-gray-200 dark:bg-yt-darkHover px-4 py-2 rounded-full text-sm font-medium hover:bg-gray-300 dark:hover:bg-yt-darkBorder transition"><i class="fas fa-edit mr-1"></i> Editar Perfil</button>
+                    </div>
+                    <h3 class="font-bold text-lg mb-4"><i class="fas fa-video text-yt-brand"></i> Meus Vídeos</h3>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4" id="my-videos-grid">
+                        ${myVideos.length === 0 ? '<p class="text-gray-500 col-span-full py-4 text-center">Você ainda não publicou nenhum vídeo.</p>' : myVideos.map(v => `
+                            <div class="group cursor-pointer fade-in" onclick="openVideo('${v.id}')">
+                                <div class="aspect-video bg-black rounded-xl overflow-hidden mb-2">
+                                    <video class="video-thumbnail" src="${v.url}#t=1"></video>
+                                </div>
+                                <h4 class="text-sm font-bold line-clamp-2 group-hover:text-yt-brand transition-colors">${v.title}</h4>
+                                <p class="text-xs text-gray-500">${v.views || 0} visualizações</p>
+                            </div>
+                        `).join('')}
+                    </div>
+                </div>
+            `;
+        }
+
+        function openEditProfileModal() {
+            const p = state.userProfile || {};
+            document.getElementById('edit-profile-name').value = p.displayName || '';
+            document.getElementById('edit-profile-photo').value = p.photoURL || '';
+            document.getElementById('edit-profile-bio').value = p.bio || '';
+            document.getElementById('modal-edit-profile').classList.remove('hidden');
+            document.body.style.overflow = 'hidden';
+        }
+
+        function closeEditProfileModal() {
+            document.getElementById('modal-edit-profile').classList.add('hidden');
+            document.body.style.overflow = '';
+        }
+
+        async function saveProfile() {
+            const name = document.getElementById('edit-profile-name').value.trim();
+            const photo = document.getElementById('edit-profile-photo').value.trim();
+            const bio = document.getElementById('edit-profile-bio').value.trim();
+            if (!name) return showToast('Nome é obrigatório.', 'error');
+
+            // Verificar unicidade do nome
+            try {
+                const { getDocs, query, collection, where, doc, updateDoc } = window.firestoreHelpers;
+                const q = query(collection(window.db, 'users'), where('displayName', '==', name));
+                const snap = await getDocs(q);
+                const existsAnother = snap.docs.some(d => d.id !== state.currentUser.uid);
+                if (existsAnother) return showToast('Este nome já está em uso por outro canal.', 'error');
+
+                await updateDoc(doc(window.db, 'users', state.currentUser.uid), {
+                    displayName: name,
+                    photoURL: photo,
+                    bio: bio
+                });
+                await updateProfile(state.currentUser, { displayName: name, photoURL: photo });
+                state.userProfile.displayName = name;
+                state.userProfile.photoURL = photo;
+                state.userProfile.bio = bio;
+                updateAuthUI();
+                if (document.getElementById('page-profile').classList.contains('active')) renderProfile();
+                closeEditProfileModal();
+                showToast('Perfil atualizado!');
+            } catch (e) {
+                showToast('Erro ao salvar perfil.', 'error');
+            }
+        }
+
+        // =============================================
+        // NAVEGAÇÃO SPA
+        // =============================================
+        function navigateTo(pageId) {
+            document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+            const pageEl = document.getElementById(`page-${pageId}`);
+            if (pageEl) pageEl.classList.add('active');
+            window.scrollTo(0, 0);
 
             if (pageId !== 'player') {
                 const player = document.getElementById('html-player');
-                player.pause();
-                state.isPlaying = false;
-                updatePlayButton();
+                if (player) {
+                    player.pause();
+                    state.isPlaying = false;
+                    updatePlayButton();
+                }
             }
 
             if (pageId === 'auth') renderAuthPage();
             if (pageId === 'profile') renderProfile();
             if (pageId === 'trending') renderTrending();
+
+            window.location.hash = pageId === 'player' ? `player/${state.currentVideoId}` : pageId;
         }
 
-        // Renderização de Categorias
+        // =============================================
+        // CATEGORIAS
+        // =============================================
         function renderCategories() {
             const sidebar = document.getElementById('sidebar-categories');
             const chips = document.getElementById('category-chips');
@@ -666,14 +957,15 @@
                 <button onclick="filterCategory('${cat.id}')" class="chip px-4 py-1.5 rounded-lg bg-gray-200 dark:bg-yt-darkHover hover:bg-gray-300 dark:hover:bg-yt-darkBorder transition whitespace-nowrap text-xs sm:text-sm font-medium ${state.selectedCategory === cat.id ? 'bg-yt-brand text-white dark:bg-yt-brand' : ''}">${cat.name}</button>
             `).join('');
             
-            chips.innerHTML = allChips;
-
-            sidebar.innerHTML = state.categories.map(cat => `
-                <a href="#" onclick="filterCategory('${cat.id}'); toggleSidebar()" class="flex items-center px-6 py-3 hover:bg-yt-lightHover dark:hover:bg-yt-darkHover gap-4 rounded-lg mx-2 transition text-sm">
-                    <i class="${cat.icon} w-6 text-center"></i>
-                    <span class="font-medium">${cat.name}</span>
-                </a>
-            `).join('');
+            if (chips) chips.innerHTML = allChips;
+            if (sidebar) {
+                sidebar.innerHTML = state.categories.map(cat => `
+                    <a href="#" onclick="filterCategory('${cat.id}'); toggleSidebar()" class="flex items-center px-6 py-3 hover:bg-yt-lightHover dark:hover:bg-yt-darkHover gap-4 rounded-lg mx-2 transition text-sm">
+                        <i class="${cat.icon} w-6 text-center"></i>
+                        <span class="font-medium">${cat.name}</span>
+                    </a>
+                `).join('');
+            }
 
             const catInputs = state.categories.map(cat => `
                 <div class="relative">
@@ -682,8 +974,8 @@
                 </div>
             `).join('');
 
-            uploadCats.innerHTML = catInputs;
-            editCats.innerHTML = catInputs.replace(/cat-/g, 'edit-cat-');
+            if (uploadCats) uploadCats.innerHTML = catInputs;
+            if (editCats) editCats.innerHTML = catInputs.replace(/cat-/g, 'edit-cat-');
         }
 
         function filterCategory(catId) {
@@ -693,7 +985,9 @@
             navigateTo('home');
         }
 
-        // Gestão de Vídeos
+        // =============================================
+        // VÍDEOS
+        // =============================================
         async function loadVideos() {
             try {
                 const q = window.firestoreHelpers.query(
@@ -702,15 +996,19 @@
                 );
                 const snapshot = await window.firestoreHelpers.getDocs(q);
                 state.allVideos = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-                renderVideoGrid();
             } catch (error) {
-                console.error("Erro ao carregar vídeos:", error);
+                console.error('Erro ao carregar vídeos:', error);
+                state.allVideos = [];
             }
+            renderVideoGrid();
+            // Atualiza durações nos cards
+            updateAllDurations();
         }
 
         function renderVideoGrid() {
             const grid = document.getElementById('video-grid');
             const noResults = document.getElementById('no-results');
+            if (!grid) return;
             
             let filtered = state.allVideos;
             if (state.selectedCategory !== 'all') {
@@ -723,25 +1021,28 @@
 
             if (filtered.length === 0) {
                 grid.innerHTML = '';
-                noResults.classList.remove('hidden');
+                if (noResults) noResults.classList.remove('hidden');
                 return;
             }
 
-            noResults.classList.add('hidden');
-            grid.innerHTML = filtered.map(v => `
+            if (noResults) noResults.classList.add('hidden');
+            grid.innerHTML = filtered.map(v => {
+                const uploaderPhoto = v.uploaderPhotoURL || '';
+                const initial = v.uploaderName ? v.uploaderName[0].toUpperCase() : 'U';
+                return `
                 <div class="group cursor-pointer fade-in" onclick="openVideo('${v.id}')">
                     <div class="relative aspect-video bg-gray-200 dark:bg-yt-darkHover rounded-xl overflow-hidden mb-3 shadow-sm group-hover:shadow-md transition-all duration-300">
-                        <video class="video-thumbnail" src="${v.url}#t=1"></video>
+                        <video class="video-thumbnail" src="${v.url}#t=1" preload="metadata"></video>
                         <div class="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors flex items-center justify-center">
                             <i class="fas fa-play text-white opacity-0 group-hover:opacity-100 transition-opacity text-2xl drop-shadow-lg"></i>
                         </div>
-                        <div class="absolute bottom-2 right-2 bg-black/80 text-white text-[10px] font-bold px-1.5 py-0.5 rounded">
-                            <i class="fas fa-clock mr-1"></i> Video
+                        <div class="absolute bottom-2 right-2 bg-black/80 text-white text-[10px] font-bold px-1.5 py-0.5 rounded" id="duration-${v.id}">
+                            <i class="fas fa-clock mr-1"></i>
                         </div>
                     </div>
                     <div class="flex gap-3">
-                        <div class="w-9 h-9 rounded-full bg-gradient-to-br from-orange-400 to-yt-brand flex-shrink-0 flex items-center justify-center text-white font-bold text-sm shadow-inner">
-                            ${v.uploaderName ? v.uploaderName[0].toUpperCase() : 'U'}
+                        <div class="w-9 h-9 rounded-full bg-gradient-to-br from-orange-400 to-yt-brand flex-shrink-0 flex items-center justify-center text-white font-bold text-sm shadow-inner overflow-hidden">
+                            ${uploaderPhoto ? `<img src="${uploaderPhoto}" class="w-full h-full object-cover">` : initial}
                         </div>
                         <div class="min-w-0">
                             <h3 class="font-bold text-sm sm:text-base leading-snug line-clamp-2 group-hover:text-yt-brand transition-colors mb-1">${v.title}</h3>
@@ -750,299 +1051,359 @@
                         </div>
                     </div>
                 </div>
-            `).join('');
-        }
-
-        // Funções de Auth e UI
-        function renderAuthPage(isRegister = false) {
-            const content = document.getElementById('auth-content');
-            
-            if (isRegister) {
-                content.innerHTML = `
-                    <div class="text-center mb-8">
-                        <i class="fas fa-user-plus text-4xl text-yt-brand mb-4"></i>
-                        <h2 class="text-2xl font-black">Crie sua conta</h2>
-                        <p class="text-gray-500 text-sm mt-1">Junte-se à maior comunidade de streaming!</p>
-                    </div>
-                    
-                    <div class="space-y-4">
-                        <button onclick="handleGoogleLogin()" class="google-btn w-full flex items-center justify-center gap-3 py-3 rounded-xl font-bold text-sm">
-                            <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" class="w-5 h-5">
-                            Continuar com Google
-                        </button>
-                        
-                        <div class="flex items-center gap-4 my-6">
-                            <div class="flex-1 h-px bg-gray-200 dark:bg-yt-darkBorder"></div>
-                            <span class="text-xs text-gray-400 font-bold uppercase">ou</span>
-                            <div class="flex-1 h-px bg-gray-200 dark:bg-yt-darkBorder"></div>
-                        </div>
-
-                        <div class="space-y-3">
-                            <div class="relative">
-                                <i class="fas fa-user absolute left-4 top-1/2 -translate-y-1/2 text-gray-400"></i>
-                                <input type="text" id="reg-name" placeholder="Como quer ser chamado?" class="auth-input pl-11">
-                            </div>
-                            <div class="relative">
-                                <i class="fas fa-envelope absolute left-4 top-1/2 -translate-y-1/2 text-gray-400"></i>
-                                <input type="email" id="reg-email" placeholder="Seu melhor e-mail" class="auth-input pl-11">
-                            </div>
-                            <div class="relative">
-                                <i class="fas fa-lock absolute left-4 top-1/2 -translate-y-1/2 text-gray-400"></i>
-                                <input type="password" id="reg-pass" placeholder="Crie uma senha forte" class="auth-input pl-11">
-                            </div>
-                        </div>
-
-                        <button onclick="handleRegister()" class="w-full bg-yt-brand text-white py-3.5 rounded-xl font-black text-sm hover:brightness-110 active:scale-95 transition-all shadow-lg shadow-orange-500/20 mt-2">
-                            CRIAR MINHA CONTA
-                        </button>
-                        
-                        <p class="text-center text-xs text-gray-500 mt-6">
-                            Já tem uma conta? 
-                            <button onclick="renderAuthPage(false)" class="text-yt-brand font-bold hover:underline">Faça login agora</button>
-                        </p>
-                    </div>
                 `;
-            } else {
-                content.innerHTML = `
-                    <div class="text-center mb-8">
-                        <i class="fas fa-play-circle text-5xl text-yt-brand mb-4"></i>
-                        <h2 class="text-2xl font-black">Bem-vindo de volta!</h2>
-                        <p class="text-gray-500 text-sm mt-1">Sentimos sua falta no AnimeStream.</p>
-                    </div>
-                    
-                    <div class="space-y-4">
-                        <button onclick="handleGoogleLogin()" class="google-btn w-full flex items-center justify-center gap-3 py-3 rounded-xl font-bold text-sm">
-                            <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" class="w-5 h-5">
-                            Entrar com Google
-                        </button>
+            }).join('');
 
-                        <div class="flex items-center gap-4 my-6">
-                            <div class="flex-1 h-px bg-gray-200 dark:bg-yt-darkBorder"></div>
-                            <span class="text-xs text-gray-400 font-bold uppercase">ou</span>
-                            <div class="flex-1 h-px bg-gray-200 dark:bg-yt-darkBorder"></div>
-                        </div>
-
-                        <div class="space-y-3">
-                            <div class="relative">
-                                <i class="fas fa-envelope absolute left-4 top-1/2 -translate-y-1/2 text-gray-400"></i>
-                                <input type="email" id="login-email" placeholder="E-mail" class="auth-input pl-11">
-                            </div>
-                            <div class="relative">
-                                <i class="fas fa-lock absolute left-4 top-1/2 -translate-y-1/2 text-gray-400"></i>
-                                <input type="password" id="login-pass" placeholder="Senha" class="auth-input pl-11">
-                            </div>
-                        </div>
-
-                        <button onclick="handleLogin()" class="w-full bg-yt-brand text-white py-3.5 rounded-xl font-black text-sm hover:brightness-110 active:scale-95 transition-all shadow-lg shadow-orange-500/20 mt-2">
-                            ACESSAR CONTA
-                        </button>
-                        
-                        <div class="flex flex-col items-center gap-4 mt-6">
-                            <button onclick="showToast('Em desenvolvimento', 'info')" class="text-xs text-gray-400 hover:text-yt-brand transition">Esqueceu sua senha?</button>
-                            <p class="text-xs text-gray-500">
-                                Não é membro ainda? 
-                                <button onclick="renderAuthPage(true)" class="text-yt-brand font-bold hover:underline">Cadastre-se grátis</button>
-                            </p>
-                        </div>
-                    </div>
-                `;
-            }
-        }
-
-        async function handleGoogleLogin() {
-            const provider = new window.GoogleAuthProvider();
-            try {
-                const result = await window.signInWithPopup(window.auth, provider);
-                showToast(`Bem-vindo, ${result.user.displayName}!`);
-                navigateTo('home');
-            } catch (error) {
-                console.error(error);
-                showToast('Falha no login com Google', 'error');
-            }
-        }
-
-        async function handleRegister() {
-            const name = document.getElementById('reg-name').value;
-            const email = document.getElementById('reg-email').value;
-            const pass = document.getElementById('reg-pass').value;
-
-            if (!name || !email || !pass) return showToast('Preencha todos os campos', 'error');
-
-            try {
-                const cred = await window.auth.createUserWithEmailAndPassword(email, pass);
-                await cred.user.updateProfile({ displayName: name });
-                showToast('Conta criada com sucesso!');
-                navigateTo('home');
-            } catch (error) {
-                showToast('Erro ao criar conta: ' + error.message, 'error');
-            }
-        }
-
-        async function handleLogin() {
-            const email = document.getElementById('login-email').value;
-            const pass = document.getElementById('login-pass').value;
-
-            try {
-                await window.auth.signInWithEmailAndPassword(email, pass);
-                showToast('Login realizado!');
-                navigateTo('home');
-            } catch (error) {
-                showToast('E-mail ou senha incorretos', 'error');
-            }
-        }
-
-        async function handleLogout() {
-            await window.auth.signOut();
-            showToast('Você saiu da conta', 'info');
-            navigateTo('home');
-        }
-
-        // Jogador de Vídeo
-        async function openVideo(id) {
-            state.currentVideoId = id;
-            const video = state.allVideos.find(v => v.id === id);
-            if (!video) return;
-
-            state.currentVideoData = video;
-            navigateTo('player');
-
-            const player = document.getElementById('html-player');
-            const title = document.getElementById('player-title');
-            const desc = document.getElementById('player-desc');
-            const uploader = document.getElementById('player-uploader-name');
-            const avatar = document.getElementById('player-uploader-avatar');
-            const likesCount = document.getElementById('likes-count');
-
-            player.src = video.url;
-            title.innerText = video.title;
-            desc.innerText = video.description || 'Sem descrição.';
-            uploader.innerText = video.uploaderName || 'Uploader';
-            avatar.innerText = video.uploaderName ? video.uploaderName[0].toUpperCase() : 'U';
-            likesCount.innerText = video.likes || 0;
-
-            // Incrementa view (simples)
-            await window.firestoreHelpers.updateDoc(window.firestoreHelpers.doc(window.db, 'videos', id), {
-                views: window.firestoreHelpers.increment(1)
+            // Atualiza as durações dos cards recém-renderizados
+            requestAnimationFrame(() => {
+                updateAllDurations();
             });
-
-            updatePlayerUI();
-            loadRecommended();
-            renderEditButtons();
-            updateFollowButton();
-            updateLikeButton();
-            
-            player.play();
-            state.isPlaying = true;
-            updatePlayButton();
-            
-            // Histórico simples na URL
-            window.location.hash = `player/${id}`;
         }
 
-        function setupPlayerListeners() {
-            const player = document.getElementById('html-player');
-            const progress = document.getElementById('progress-bar');
-            const time = document.getElementById('time-display');
-
-            player.ontimeupdate = () => {
-                const perc = (player.currentTime / player.duration) * 100;
-                progress.style.width = perc + '%';
-                time.innerText = `${formatTime(player.currentTime)} / ${formatTime(player.duration || 0)}`;
-            };
-
-            player.onended = () => {
-                state.isPlaying = false;
-                updatePlayButton();
-            };
-
-            // Teclas de atalho
-            window.addEventListener('keydown', (e) => {
-                if (document.getElementById('page-player').classList.contains('active')) {
-                    if (e.code === 'Space') { e.preventDefault(); togglePlay(); }
-                    if (e.code === 'ArrowRight') skipTime(10);
-                    if (e.code === 'ArrowLeft') skipTime(-10);
+        function updateAllDurations() {
+            state.allVideos.forEach(v => {
+                const el = document.getElementById(`duration-${v.id}`);
+                if (el) {
+                    const tempVideo = document.createElement('video');
+                    tempVideo.preload = 'metadata';
+                    tempVideo.src = v.url;
+                    tempVideo.addEventListener('loadedmetadata', function() {
+                        if (tempVideo.duration && isFinite(tempVideo.duration)) {
+                            el.textContent = formatTime(tempVideo.duration);
+                        } else {
+                            el.textContent = '';
+                        }
+                    });
+                    tempVideo.addEventListener('error', () => { el.textContent = ''; });
                 }
             });
         }
 
-        function togglePlay() {
+        function renderTrending() {
+            const grid = document.getElementById('trending-grid');
+            if (!grid) return;
+            const sorted = [...state.allVideos].sort((a, b) => (b.likes || 0) - (a.likes || 0)).slice(0, 20);
+            grid.innerHTML = sorted.length === 0 
+                ? '<p class="text-gray-500 col-span-full text-center py-8">Nenhum vídeo em alta.</p>'
+                : sorted.map(v => `
+                    <div class="group cursor-pointer fade-in" onclick="openVideo('${v.id}')">
+                        <div class="aspect-video bg-black rounded-xl overflow-hidden mb-2">
+                            <video class="video-thumbnail" src="${v.url}#t=1"></video>
+                        </div>
+                        <h4 class="text-sm font-bold line-clamp-2 group-hover:text-yt-brand transition-colors">${v.title}</h4>
+                        <p class="text-xs text-gray-500">${v.views || 0} visualizações</p>
+                    </div>
+                `).join('');
+        }
+
+        async function openVideo(id) {
+            state.currentVideoId = id;
+            const video = state.allVideos.find(v => v.id === id);
+            if (!video) return;
+            state.currentVideoData = video;
+            navigateTo('player');
+
             const player = document.getElementById('html-player');
-            if (player.paused) {
-                player.play();
+            if (player) {
+                player.src = video.url;
+                document.getElementById('player-title').innerText = video.title;
+                document.getElementById('player-desc').innerText = video.description || 'Sem descrição.';
+                document.getElementById('player-uploader-name').innerText = video.uploaderName || 'Uploader';
+                document.getElementById('likes-count').innerText = video.likes || 0;
+                document.getElementById('dislikes-count').innerText = video.dislikes || 0;
+                // Avatar do uploader
+                const avatarEl = document.getElementById('player-uploader-avatar');
+                if (video.uploaderPhotoURL) {
+                    avatarEl.innerHTML = `<img src="${video.uploaderPhotoURL}" class="w-full h-full object-cover">`;
+                } else {
+                    avatarEl.innerHTML = video.uploaderName ? video.uploaderName[0].toUpperCase() : 'U';
+                }
+
+                try {
+                    await window.firestoreHelpers.updateDoc(window.firestoreHelpers.doc(window.db, 'videos', id), {
+                        views: window.firestoreHelpers.increment(1)
+                    });
+                } catch(e) {}
+
+                updatePlayerUI();
+                loadRecommended();
+                renderEditButtons();
+                updateFollowButton();
+                updateLikeButton();
+                updateDislikeButton();
+
+                player.play().catch(() => {});
                 state.isPlaying = true;
-            } else {
-                player.pause();
-                state.isPlaying = false;
+                updatePlayButton();
             }
-            updatePlayButton();
         }
 
-        function updatePlayButton() {
-            const btn = document.getElementById('play-btn');
-            btn.innerHTML = state.isPlaying ? '<i class="fas fa-pause"></i>' : '<i class="fas fa-play"></i>';
+        function updatePlayerUI() {
+            const likesCount = document.getElementById('likes-count');
+            const dislikesCount = document.getElementById('dislikes-count');
+            if (likesCount && state.currentVideoData) {
+                likesCount.innerText = state.currentVideoData.likes || 0;
+            }
+            if (dislikesCount && state.currentVideoData) {
+                dislikesCount.innerText = state.currentVideoData.dislikes || 0;
+            }
         }
 
-        function skipTime(seconds) {
-            const player = document.getElementById('html-player');
-            player.currentTime += seconds;
+        function loadRecommended() {
+            const list = document.getElementById('recommended-list');
+            if (!list) return;
+            const recs = state.allVideos.filter(v => v.id !== state.currentVideoId).slice(0, 10);
+            list.innerHTML = `<h3 class="font-bold mb-4 px-3 sm:px-0">Recomendados</h3>` + recs.map(v => `
+                <div class="flex gap-3 mb-4 cursor-pointer group" onclick="openVideo('${v.id}')">
+                    <div class="w-40 aspect-video bg-gray-200 dark:bg-yt-darkHover rounded-lg overflow-hidden flex-shrink-0 relative">
+                        <video class="video-thumbnail" src="${v.url}#t=1" preload="metadata"></video>
+                        <div class="absolute bottom-1 right-1 bg-black/80 text-white text-[9px] px-1 py-0.5 rounded" id="rec-duration-${v.id}"></div>
+                    </div>
+                    <div class="min-w-0">
+                        <h4 class="text-sm font-bold line-clamp-2 leading-tight group-hover:text-yt-brand transition-colors">${v.title}</h4>
+                        <p class="text-[11px] text-gray-500 mt-1">${v.uploaderName || 'Uploader'}</p>
+                        <p class="text-[10px] text-gray-400">${v.views || 0} visualizações</p>
+                    </div>
+                </div>
+            `).join('');
+
+            // Atualiza durações dos recomendados
+            requestAnimationFrame(() => {
+                recs.forEach(v => {
+                    const el = document.getElementById(`rec-duration-${v.id}`);
+                    if (el) {
+                        const tempVideo = document.createElement('video');
+                        tempVideo.preload = 'metadata';
+                        tempVideo.src = v.url;
+                        tempVideo.addEventListener('loadedmetadata', function() {
+                            if (tempVideo.duration && isFinite(tempVideo.duration)) {
+                                el.textContent = formatTime(tempVideo.duration);
+                            } else {
+                                el.textContent = '';
+                            }
+                        });
+                    }
+                });
+            });
         }
 
-        function seekVideo(e) {
-            const player = document.getElementById('html-player');
-            const container = document.getElementById('progress-container');
-            const rect = container.getBoundingClientRect();
-            const pos = (e.clientX || e.touches[0].clientX) - rect.left;
-            const perc = pos / rect.width;
-            player.currentTime = perc * player.duration;
+        function renderEditButtons() {
+            const container = document.getElementById('player-edit-buttons');
+            if (!container) return;
+            if (state.currentUser && state.currentVideoData && state.currentVideoData.uploaderId === state.currentUser.uid) {
+                container.innerHTML = `<button onclick="toggleEditModal(true)" class="p-2 rounded-full hover:bg-gray-200 dark:hover:bg-yt-darkHover transition"><i class="fas fa-edit"></i></button>`;
+                container.classList.remove('hidden');
+            } else {
+                container.classList.add('hidden');
+            }
         }
 
-        function changePlaybackSpeed() {
-            const player = document.getElementById('html-player');
-            const speeds = [1, 1.25, 1.5, 2];
-            let idx = speeds.indexOf(state.currentSpeed);
-            idx = (idx + 1) % speeds.length;
-            state.currentSpeed = speeds[idx];
-            player.playbackRate = state.currentSpeed;
-            document.getElementById('speed-btn').innerText = state.currentSpeed + 'x';
+        function toggleEditModal(show) {
+            const modal = document.getElementById('modal-edit-video');
+            if (!modal) return;
+            modal.classList.toggle('hidden', !show);
+            if (show) {
+                document.getElementById('edit-video-id').value = state.currentVideoId;
+                document.getElementById('edit-title').value = state.currentVideoData.title;
+                document.getElementById('edit-desc').value = state.currentVideoData.description || '';
+                document.querySelectorAll('[id^="edit-cat-"]').forEach(c => {
+                    c.checked = state.currentVideoData.categories.includes(c.value);
+                });
+            }
         }
 
-        function toggleFullscreen() {
-            const player = document.getElementById('html-player');
-            if (player.requestFullscreen) player.requestFullscreen();
-            else if (player.webkitRequestFullscreen) player.webkitRequestFullscreen();
+        async function saveEditVideo() {
+            const id = document.getElementById('edit-video-id').value;
+            const title = document.getElementById('edit-title').value;
+            const desc = document.getElementById('edit-desc').value;
+            const cats = Array.from(document.querySelectorAll('[id^="edit-cat-"]:checked')).map(c => c.value);
+            try {
+                await window.firestoreHelpers.updateDoc(window.firestoreHelpers.doc(window.db, 'videos', id), { title, description: desc, categories: cats });
+                showToast('Alterações salvas!');
+                toggleEditModal(false);
+                await loadVideos();
+                openVideo(id);
+            } catch (e) { showToast('Erro ao salvar', 'error'); }
         }
 
-        // Interações (Like, Follow, etc)
+        async function deleteVideo() {
+            if (!confirm('Deseja realmente excluir este vídeo permanentemente?')) return;
+            try {
+                await window.firestoreHelpers.deleteDoc(window.firestoreHelpers.doc(window.db, 'videos', state.currentVideoId));
+                showToast('Vídeo excluído');
+                toggleEditModal(false);
+                await loadVideos();
+                navigateTo('home');
+            } catch (e) { showToast('Erro ao excluir', 'error'); }
+        }
+
+        // =============================================
+        // UPLOAD
+        // =============================================
+        function toggleUploadModal(show) {
+            if (show && !state.currentUser) return navigateTo('auth');
+            const modal = document.getElementById('modal-upload');
+            if (!modal) return;
+            modal.classList.toggle('hidden', !show);
+            if (show) {
+                document.getElementById('up-url').value = '';
+                document.getElementById('up-title').value = '';
+                document.getElementById('up-desc').value = '';
+                document.querySelectorAll('.category-checkbox').forEach(c => c.checked = false);
+                document.getElementById('thumbnail-preview').innerHTML = '<div class="text-center"><i class="fas fa-image text-5xl text-gray-600 mb-2"></i><p class="text-xs text-gray-500">Pré-visualização da thumbnail</p></div>';
+                const agreeTerms = document.getElementById('agree-terms');
+                if (agreeTerms) agreeTerms.checked = false;
+            }
+        }
+
+        function previewThumbnail(url) {
+            const preview = document.getElementById('thumbnail-preview');
+            if (!preview) return;
+            if (url && (url.includes('.mp4') || url.includes('.webm') || url.includes('.mov'))) {
+                preview.innerHTML = `<video class="w-full h-full object-cover" src="${url}#t=1"></video>`;
+            }
+        }
+
+        async function handleUpload() {
+            const agreeTerms = document.getElementById('agree-terms');
+            if (agreeTerms && !agreeTerms.checked) return showToast('Você deve concordar com as regras de upload.', 'error');
+            
+            const url = document.getElementById('up-url').value;
+            const title = document.getElementById('up-title').value;
+            const desc = document.getElementById('up-desc').value;
+            const selectedCats = Array.from(document.querySelectorAll('.category-checkbox:checked')).map(c => c.value);
+
+            if (!url || !title || selectedCats.length === 0) return showToast('Preencha os campos obrigatórios', 'error');
+
+            try {
+                await window.firestoreHelpers.addDoc(window.firestoreHelpers.collection(window.db, 'videos'), {
+                    url, title, description: desc,
+                    categories: selectedCats,
+                    uploaderId: state.currentUser.uid,
+                    uploaderName: state.userProfile?.displayName || state.currentUser.displayName,
+                    uploaderPhotoURL: state.userProfile?.photoURL || state.currentUser.photoURL || '',
+                    views: 0, likes: 0, dislikes: 0, likedBy: [], dislikedBy: [],
+                    createdAt: window.firestoreHelpers.serverTimestamp()
+                });
+                showToast('Vídeo publicado!');
+                toggleUploadModal(false);
+                await loadVideos();
+            } catch (e) { showToast('Erro ao publicar: ' + e.message, 'error'); }
+        }
+
+        // =============================================
+        // INTERAÇÕES (LIKE, DISLIKE, FOLLOW)
+        // =============================================
         async function toggleLike() {
             if (!state.currentUser) return navigateTo('auth');
             const id = state.currentVideoId;
             const vidRef = window.firestoreHelpers.doc(window.db, 'videos', id);
-            const isLiked = state.currentVideoData.likedBy && state.currentVideoData.likedBy.includes(state.currentUser.uid);
+            const userRef = window.firestoreHelpers.doc(window.db, 'users', state.currentUser.uid);
 
+            // Se já deu dislike, remove o dislike primeiro
+            if (state.dislikedVideos.includes(id)) {
+                await window.firestoreHelpers.updateDoc(vidRef, {
+                    dislikes: window.firestoreHelpers.increment(-1),
+                    dislikedBy: window.firestoreHelpers.arrayRemove(state.currentUser.uid)
+                });
+                await window.firestoreHelpers.updateDoc(userRef, {
+                    dislikedVideos: window.firestoreHelpers.arrayRemove(id)
+                });
+                state.dislikedVideos = state.dislikedVideos.filter(v => v !== id);
+            }
+
+            const isLiked = state.likedVideos.includes(id);
             try {
                 if (isLiked) {
                     await window.firestoreHelpers.updateDoc(vidRef, {
                         likes: window.firestoreHelpers.increment(-1),
                         likedBy: window.firestoreHelpers.arrayRemove(state.currentUser.uid)
                     });
+                    await window.firestoreHelpers.updateDoc(userRef, {
+                        likedVideos: window.firestoreHelpers.arrayRemove(id)
+                    });
+                    state.likedVideos = state.likedVideos.filter(v => v !== id);
                 } else {
                     await window.firestoreHelpers.updateDoc(vidRef, {
                         likes: window.firestoreHelpers.increment(1),
                         likedBy: window.firestoreHelpers.arrayUnion(state.currentUser.uid)
                     });
+                    await window.firestoreHelpers.updateDoc(userRef, {
+                        likedVideos: window.firestoreHelpers.arrayUnion(id)
+                    });
+                    state.likedVideos.push(id);
                 }
                 // Recarrega dados do vídeo
                 const updated = await window.firestoreHelpers.getDocs(window.firestoreHelpers.query(window.firestoreHelpers.collection(window.db, 'videos'), window.firestoreHelpers.where('__name__', '==', id)));
                 state.currentVideoData = { id: updated.docs[0].id, ...updated.docs[0].data() };
-                document.getElementById('likes-count').innerText = state.currentVideoData.likes;
+                document.getElementById('likes-count').innerText = state.currentVideoData.likes || 0;
+                document.getElementById('dislikes-count').innerText = state.currentVideoData.dislikes || 0;
                 updateLikeButton();
+                updateDislikeButton();
+            } catch (e) { console.error(e); }
+        }
+
+        async function toggleDislike() {
+            if (!state.currentUser) return navigateTo('auth');
+            const id = state.currentVideoId;
+            const vidRef = window.firestoreHelpers.doc(window.db, 'videos', id);
+            const userRef = window.firestoreHelpers.doc(window.db, 'users', state.currentUser.uid);
+
+            // Se já deu like, remove o like primeiro
+            if (state.likedVideos.includes(id)) {
+                await window.firestoreHelpers.updateDoc(vidRef, {
+                    likes: window.firestoreHelpers.increment(-1),
+                    likedBy: window.firestoreHelpers.arrayRemove(state.currentUser.uid)
+                });
+                await window.firestoreHelpers.updateDoc(userRef, {
+                    likedVideos: window.firestoreHelpers.arrayRemove(id)
+                });
+                state.likedVideos = state.likedVideos.filter(v => v !== id);
+            }
+
+            const isDisliked = state.dislikedVideos.includes(id);
+            try {
+                if (isDisliked) {
+                    await window.firestoreHelpers.updateDoc(vidRef, {
+                        dislikes: window.firestoreHelpers.increment(-1),
+                        dislikedBy: window.firestoreHelpers.arrayRemove(state.currentUser.uid)
+                    });
+                    await window.firestoreHelpers.updateDoc(userRef, {
+                        dislikedVideos: window.firestoreHelpers.arrayRemove(id)
+                    });
+                    state.dislikedVideos = state.dislikedVideos.filter(v => v !== id);
+                } else {
+                    await window.firestoreHelpers.updateDoc(vidRef, {
+                        dislikes: window.firestoreHelpers.increment(1),
+                        dislikedBy: window.firestoreHelpers.arrayUnion(state.currentUser.uid)
+                    });
+                    await window.firestoreHelpers.updateDoc(userRef, {
+                        dislikedVideos: window.firestoreHelpers.arrayUnion(id)
+                    });
+                    state.dislikedVideos.push(id);
+                }
+                // Recarrega dados do vídeo
+                const updated = await window.firestoreHelpers.getDocs(window.firestoreHelpers.query(window.firestoreHelpers.collection(window.db, 'videos'), window.firestoreHelpers.where('__name__', '==', id)));
+                state.currentVideoData = { id: updated.docs[0].id, ...updated.docs[0].data() };
+                document.getElementById('likes-count').innerText = state.currentVideoData.likes || 0;
+                document.getElementById('dislikes-count').innerText = state.currentVideoData.dislikes || 0;
+                updateLikeButton();
+                updateDislikeButton();
             } catch (e) { console.error(e); }
         }
 
         function updateLikeButton() {
             const btn = document.getElementById('btn-like');
-            const isLiked = state.currentVideoData.likedBy && state.currentVideoData.likedBy.includes(state.currentUser?.uid);
+            if (!btn) return;
+            const isLiked = state.likedVideos.includes(state.currentVideoId);
             btn.classList.toggle('text-yt-brand', isLiked);
+        }
+
+        function updateDislikeButton() {
+            const btn = document.getElementById('btn-dislike');
+            if (!btn) return;
+            const isDisliked = state.dislikedVideos.includes(state.currentVideoId);
+            btn.classList.toggle('text-red-500', isDisliked);
         }
 
         async function toggleFollow() {
@@ -1056,7 +1417,6 @@
                 window.firestoreHelpers.where('followerId', '==', state.currentUser.uid),
                 window.firestoreHelpers.where('followedId', '==', targetId)
             );
-
             try {
                 if (isFollowing) {
                     const snap = await window.firestoreHelpers.getDocs(followQ);
@@ -1075,22 +1435,11 @@
             } catch (e) { console.error(e); }
         }
 
-        async function loadFollowing() {
-            const q = window.firestoreHelpers.query(
-                window.firestoreHelpers.collection(window.db, 'follows'),
-                window.firestoreHelpers.where('followerId', '==', state.currentUser.uid)
-            );
-            const snap = await window.firestoreHelpers.getDocs(q);
-            state.following = snap.docs.map(d => d.data().followedId);
-            updateFollowButton();
-        }
-
         function updateFollowButton() {
             const btn = document.getElementById('btn-follow');
             const text = document.getElementById('btn-follow-text');
-            if (!btn) return;
-
-            const isFollowing = state.following.includes(state.currentVideoData?.uploaderId);
+            if (!btn || !text) return;
+            const isFollowing = state.currentVideoData && state.following.includes(state.currentVideoData.uploaderId);
             if (isFollowing) {
                 btn.className = "bg-gray-200 dark:bg-yt-darkHover text-gray-500 px-6 py-2.5 rounded-full font-bold text-sm flex items-center gap-2";
                 text.innerText = "Inscrito";
@@ -1100,129 +1449,164 @@
             }
         }
 
-        // Pesquisa
-        function handleSearchInput(val) {
-            state.currentSearch = val;
-            if (!val) clearSearch();
-        }
-
-        function handleSearch() {
-            if (!state.currentSearch) return;
-            document.getElementById('search-indicator').classList.remove('hidden');
-            document.getElementById('search-indicator-text').innerText = `Resultados para: "${state.currentSearch}"`;
-            renderVideoGrid();
-            navigateTo('home');
-        }
-
-        function clearSearch() {
-            state.currentSearch = '';
-            document.getElementById('search-input').value = '';
-            document.getElementById('search-indicator').classList.add('hidden');
-            renderVideoGrid();
-        }
-
-        // Upload
-        function toggleUploadModal(show) {
-            if (show && !state.currentUser) return navigateTo('auth');
-            const modal = document.getElementById('modal-upload');
-            modal.classList.toggle('hidden', !show);
-            if (show) {
-                document.getElementById('up-url').value = '';
-                document.getElementById('up-title').value = '';
-                document.getElementById('up-desc').value = '';
-                document.querySelectorAll('.category-checkbox').forEach(c => c.checked = false);
-                document.getElementById('thumbnail-preview').innerHTML = '<div class="text-center"><i class="fas fa-image text-5xl text-gray-600 mb-2"></i><p class="text-xs text-gray-500">Pré-visualização da thumbnail</p></div>';
-            }
-        }
-
-        function previewThumbnail(url) {
-            const preview = document.getElementById('thumbnail-preview');
-            if (url && (url.includes('.mp4') || url.includes('.webm') || url.includes('.mov'))) {
-                preview.innerHTML = `<video class="w-full h-full object-cover" src="${url}#t=1"></video>`;
-            }
-        }
-
-        async function handleUpload() {
-            const url = document.getElementById('up-url').value;
-            const title = document.getElementById('up-title').value;
-            const desc = document.getElementById('up-desc').value;
-            const selectedCats = Array.from(document.querySelectorAll('.category-checkbox:checked')).map(c => c.value);
-
-            if (!url || !title || selectedCats.length === 0) return showToast('Preencha os campos obrigatórios', 'error');
-
-            try {
-                await window.firestoreHelpers.addDoc(window.firestoreHelpers.collection(window.db, 'videos'), {
-                    url, title, description: desc,
-                    categories: selectedCats,
-                    uploaderId: state.currentUser.uid,
-                    uploaderName: state.currentUser.displayName,
-                    views: 0, likes: 0, likedBy: [],
-                    createdAt: window.firestoreHelpers.serverTimestamp()
-                });
-                showToast('Vídeo publicado!');
-                toggleUploadModal(false);
-                loadVideos();
-            } catch (e) { showToast('Erro ao publicar: ' + e.message, 'error'); }
-        }
-
-        // Editar/Deletar (Dono do Vídeo)
-        function renderEditButtons() {
-            const container = document.getElementById('player-edit-buttons');
-            if (state.currentUser && state.currentVideoData.uploaderId === state.currentUser.uid) {
-                container.innerHTML = `
-                    <button onclick="toggleEditModal(true)" class="p-2 rounded-full hover:bg-gray-200 dark:hover:bg-yt-darkHover transition"><i class="fas fa-edit"></i></button>
-                `;
-                container.classList.remove('hidden');
+        function shareVideo() {
+            const url = window.location.href;
+            if (navigator.share) {
+                navigator.share({ title: state.currentVideoData?.title || 'Vídeo', url }).catch(() => {});
+            } else if (navigator.clipboard) {
+                navigator.clipboard.writeText(url).then(() => showToast('Link copiado!'));
             } else {
-                container.classList.add('hidden');
+                showToast('Link: ' + url, 'info');
             }
         }
 
-        function toggleEditModal(show) {
-            const modal = document.getElementById('modal-edit-video');
-            modal.classList.toggle('hidden', !show);
-            if (show) {
-                document.getElementById('edit-video-id').value = state.currentVideoId;
-                document.getElementById('edit-title').value = state.currentVideoData.title;
-                document.getElementById('edit-desc').value = state.currentVideoData.description || '';
-                document.querySelectorAll('[id^="edit-cat-"]').forEach(c => {
-                    c.checked = state.currentVideoData.categories.includes(c.value);
-                });
+        function reportVideo() {
+            const modal = document.getElementById('modal-report');
+            if (modal) modal.classList.remove('hidden');
+            document.body.style.overflow = 'hidden';
+        }
+
+        function toggleReportModal(show) {
+            const modal = document.getElementById('modal-report');
+            if (modal) {
+                modal.classList.toggle('hidden', !show);
+                document.body.style.overflow = show ? 'hidden' : '';
             }
         }
 
-        async function saveEditVideo() {
-            const id = document.getElementById('edit-video-id').value;
-            const title = document.getElementById('edit-title').value;
-            const desc = document.getElementById('edit-desc').value;
-            const cats = Array.from(document.querySelectorAll('[id^="edit-cat-"]:checked')).map(c => c.value);
-
+        async function submitReport() {
+            const reason = document.getElementById('report-reason').value;
+            const details = document.getElementById('report-details').value;
+            if (!reason) return showToast('Selecione um motivo.', 'error');
             try {
-                await window.firestoreHelpers.updateDoc(window.firestoreHelpers.doc(window.db, 'videos', id), {
-                    title, description: desc, categories: cats
+                await window.firestoreHelpers.updateDoc(window.firestoreHelpers.doc(window.db, 'videos', state.currentVideoId), {
+                    reports: window.firestoreHelpers.arrayUnion({
+                        userId: state.currentUser.uid,
+                        reason,
+                        details,
+                        createdAt: new Date().toISOString()
+                    })
                 });
-                showToast('Alterações salvas!');
-                toggleEditModal(false);
-                loadVideos();
-                openVideo(id); // Recarrega UI do player
-            } catch (e) { showToast('Erro ao salvar', 'error'); }
+                showToast('Denúncia enviada.');
+                toggleReportModal(false);
+                document.getElementById('report-reason').value = '';
+                document.getElementById('report-details').value = '';
+            } catch (e) { showToast('Erro ao enviar denúncia.', 'error'); }
         }
 
-        async function deleteVideo() {
-            if (!confirm('Deseja realmente excluir este vídeo permanentemente?')) return;
-            try {
-                await window.firestoreHelpers.deleteDoc(window.firestoreHelpers.doc(window.db, 'videos', state.currentVideoId));
-                showToast('Vídeo excluído');
-                toggleEditModal(false);
-                loadVideos();
-                navigateTo('home');
-            } catch (e) { showToast('Erro ao excluir', 'error'); }
+        // =============================================
+        // PLAYER MELHORADO
+        // =============================================
+        function setupPlayerListeners() {
+            const player = document.getElementById('html-player');
+            if (!player) return;
+            const progress = document.getElementById('progress-bar');
+            const time = document.getElementById('time-display');
+
+            player.ontimeupdate = () => {
+                if (progress && player.duration) {
+                    const perc = (player.currentTime / player.duration) * 100;
+                    progress.style.width = Math.min(perc, 100) + '%';
+                }
+                if (time) {
+                    time.innerText = `${formatTime(player.currentTime)} / ${formatTime(player.duration || 0)}`;
+                }
+            };
+            player.onended = () => { state.isPlaying = false; updatePlayButton(); };
+            player.onloadedmetadata = () => {
+                if (time) time.innerText = `0:00 / ${formatTime(player.duration || 0)}`;
+            };
+
+            window.addEventListener('keydown', (e) => {
+                if (document.getElementById('page-player') && document.getElementById('page-player').classList.contains('active')) {
+                    if (e.code === 'Space') { e.preventDefault(); togglePlay(); }
+                    if (e.code === 'ArrowRight') skipTime(10);
+                    if (e.code === 'ArrowLeft') skipTime(-10);
+                    if (e.code === 'ArrowUp') { e.preventDefault(); changeVolume(Math.min(1, (player.volume || 1) + 0.1)); }
+                    if (e.code === 'ArrowDown') { e.preventDefault(); changeVolume(Math.max(0, (player.volume || 1) - 0.1)); }
+                }
+            });
         }
 
-        // Helpers e Diversos
+        function togglePlay() {
+            const player = document.getElementById('html-player');
+            if (!player) return;
+            if (player.paused) { player.play(); state.isPlaying = true; }
+            else { player.pause(); state.isPlaying = false; }
+            updatePlayButton();
+        }
+
+        function updatePlayButton() {
+            const btn = document.getElementById('play-btn');
+            if (!btn) return;
+            btn.innerHTML = state.isPlaying ? '<i class="fas fa-pause"></i>' : '<i class="fas fa-play"></i>';
+        }
+
+        function skipTime(s) {
+            const player = document.getElementById('html-player');
+            if (player) player.currentTime += s;
+        }
+
+        function seekVideo(e) {
+            const player = document.getElementById('html-player');
+            const container = document.getElementById('progress-container');
+            if (!player || !container) return;
+            const rect = container.getBoundingClientRect();
+            const pos = (e.clientX || (e.touches && e.touches[0].clientX)) - rect.left;
+            player.currentTime = (pos / rect.width) * player.duration;
+        }
+
+        function changeVolume(value) {
+            const player = document.getElementById('html-player');
+            if (!player) return;
+            player.volume = value;
+            const slider = document.getElementById('volume-slider');
+            if (slider) slider.value = value;
+            const icon = document.querySelector('#volume-btn i');
+            if (icon) {
+                if (value == 0) icon.className = 'fas fa-volume-mute text-sm';
+                else if (value < 0.5) icon.className = 'fas fa-volume-down text-sm';
+                else icon.className = 'fas fa-volume-up text-sm';
+            }
+        }
+
+        function changePlaybackSpeed() {
+            const player = document.getElementById('html-player');
+            if (!player) return;
+            const speeds = [0.5, 0.75, 1, 1.25, 1.5, 2];
+            let idx = speeds.indexOf(state.currentSpeed);
+            idx = (idx + 1) % speeds.length;
+            state.currentSpeed = speeds[idx];
+            player.playbackRate = state.currentSpeed;
+            const speedBtn = document.getElementById('speed-btn');
+            if (speedBtn) speedBtn.querySelector('span').innerText = state.currentSpeed + 'x';
+        }
+
+        function togglePiP() {
+            const player = document.getElementById('html-player');
+            if (!player) return;
+            if (document.pictureInPictureElement) {
+                document.exitPictureInPicture();
+            } else if (document.pictureInPictureEnabled) {
+                player.requestPictureInPicture();
+            }
+        }
+
+        function toggleFullscreen() {
+            const container = document.getElementById('player-container');
+            if (container) {
+                if (container.requestFullscreen) container.requestFullscreen();
+                else if (container.webkitRequestFullscreen) container.webkitRequestFullscreen();
+            }
+        }
+
+        // =============================================
+        // UTILITÁRIOS
+        // =============================================
         function toggleSidebar() {
             const sidebar = document.getElementById('sidebar');
             const overlay = document.getElementById('sidebar-overlay');
+            if (!sidebar || !overlay) return;
             state.sidebarOpen = !state.sidebarOpen;
             sidebar.style.transform = state.sidebarOpen ? 'translateX(0)' : 'translateX(-100%)';
             overlay.classList.toggle('hidden', !state.sidebarOpen);
@@ -1230,9 +1614,8 @@
         }
 
         function formatTime(s) {
-            const h = Math.floor(s / 3600);
-            const m = Math.floor((s % 3600) / 60);
-            const sec = Math.floor(s % 60);
+            if (!isFinite(s) || isNaN(s)) return '0:00';
+            const h = Math.floor(s / 3600), m = Math.floor((s % 3600) / 60), sec = Math.floor(s % 60);
             if (h > 0) return `${h}:${m.toString().padStart(2, '0')}:${sec.toString().padStart(2, '0')}`;
             return `${m}:${sec.toString().padStart(2, '0')}`;
         }
@@ -1246,7 +1629,9 @@
         function showToast(msg, type = 'success') {
             const toast = document.getElementById('toast');
             const icon = document.getElementById('toast-icon');
-            document.getElementById('toast-msg').innerText = msg;
+            const msgEl = document.getElementById('toast-msg');
+            if (!toast || !msgEl) return;
+            msgEl.innerText = msg;
             if (type === 'error') icon.className = 'fas fa-exclamation-circle text-red-400';
             else if (type === 'info') icon.className = 'fas fa-info-circle text-blue-400';
             else icon.className = 'fas fa-check-circle text-green-400';
@@ -1262,21 +1647,27 @@
             }, 3000);
         }
 
-        function loadRecommended() {
-            const list = document.getElementById('recommended-list');
-            const recs = state.allVideos.filter(v => v.id !== state.currentVideoId).slice(0, 10);
-            list.innerHTML = `<h3 class="font-bold mb-4 px-3 sm:px-0">Recomendados</h3>` + recs.map(v => `
-                <div class="flex gap-3 mb-4 cursor-pointer group" onclick="openVideo('${v.id}')">
-                    <div class="w-40 aspect-video bg-gray-200 dark:bg-yt-darkHover rounded-lg overflow-hidden flex-shrink-0">
-                        <video class="video-thumbnail" src="${v.url}#t=1"></video>
-                    </div>
-                    <div class="min-w-0">
-                        <h4 class="text-sm font-bold line-clamp-2 leading-tight group-hover:text-yt-brand transition-colors">${v.title}</h4>
-                        <p class="text-[11px] text-gray-500 mt-1">${v.uploaderName || 'Uploader'}</p>
-                        <p class="text-[10px] text-gray-400">${v.views || 0} visualizações</p>
-                    </div>
-                </div>
-            `).join('');
+        function handleSearchInput(val) {
+            state.currentSearch = val;
+            if (!val) clearSearch();
+        }
+
+        function handleSearch() {
+            if (!state.currentSearch) return;
+            const indicator = document.getElementById('search-indicator');
+            const indicatorText = document.getElementById('search-indicator-text');
+            if (indicator) indicator.classList.remove('hidden');
+            if (indicatorText) indicatorText.innerText = `Resultados para: "${state.currentSearch}"`;
+            renderVideoGrid();
+            navigateTo('home');
+        }
+
+        function clearSearch() {
+            state.currentSearch = '';
+            document.getElementById('search-input').value = '';
+            const indicator = document.getElementById('search-indicator');
+            if (indicator) indicator.classList.add('hidden');
+            renderVideoGrid();
         }
 
         // Inicialização
