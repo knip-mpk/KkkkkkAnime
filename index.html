@@ -1,0 +1,1287 @@
+<!DOCTYPE html>
+<html lang="pt-BR" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>AnimeStream - Hub de Conteúdo</title>
+    <script src="https://cdn.tailwindcss.com">
+    </script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/12.12.1/firebase-app.js";
+        import { 
+            getFirestore, collection, addDoc, getDocs, updateDoc, deleteDoc, doc, query, where, orderBy, limit, serverTimestamp, arrayUnion, arrayRemove, increment 
+        } from "https://www.gstatic.com/firebasejs/12.12.1/firebase-firestore.js";
+        import { 
+            getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, updateProfile, onAuthStateChanged, updateEmail, updatePassword, EmailAuthProvider, reauthenticateWithCredential, deleteUser,
+            GoogleAuthProvider, signInWithPopup 
+        } from "https://www.gstatic.com/firebasejs/12.12.1/firebase-auth.js";
+        import { getStorage, ref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/12.12.1/firebase-storage.js";
+        
+        const firebaseConfig = {
+            apiKey: "AIzaSyClk8uL8vAJ9Z41PPtKjRgWzVeVmVgA6D0",
+            authDomain: "anime-a72a9.firebaseapp.com",
+            projectId: "anime-a72a9",
+            storageBucket: "anime-a72a9.firebasestorage.app",
+            messagingSenderId: "765180251076",
+            appId: "1:765180251076:web:2864b1899c165589c57291"
+        };
+        
+        const app = initializeApp(firebaseConfig);
+        window.db = getFirestore(app);
+        window.auth = getAuth(app);
+        window.storage = getStorage(app);
+        window.GoogleAuthProvider = GoogleAuthProvider;
+        window.signInWithPopup = signInWithPopup;
+        
+        window.firestoreHelpers = {
+            collection, addDoc, getDocs, updateDoc, deleteDoc, doc, query, where, orderBy, limit, serverTimestamp, arrayUnion, arrayRemove, increment
+        };
+    </script>
+
+    <script>
+        window.addEventListener('DOMContentLoaded', () => {
+            if (window.tailwind) {
+                window.tailwind.config = {
+                    darkMode: 'class',
+                    theme: {
+                        extend: {
+                            colors: {
+                                yt: {
+                                    dark: '#0f0f0f',
+                                    darkHover: '#272727',
+                                    darkBorder: '#3f3f3f',
+                                    light: '#ffffff',
+                                    lightHover: '#f2f2f2',
+                                    lightBorder: '#e5e5e5',
+                                    brand: '#f97316'
+                                }
+                            }
+                        }
+                    }
+                };
+            }
+        });
+    </script>
+    <style>
+        ::-webkit-scrollbar { width: 6px; height: 6px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: #6b7280; border-radius: 3px; }
+        
+        .hide-scroll { -ms-overflow-style: none; scrollbar-width: none; }
+        .hide-scroll::-webkit-scrollbar { display: none; }
+
+        .fade-in { animation: fadeIn 0.3s ease-out; }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .slide-up { animation: slideUp 0.3s ease-out; }
+        @keyframes slideUp {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .footer-hidden { display: none !important; }
+
+        .modal-overlay {
+            background-color: rgba(0, 0, 0, 0.85);
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
+        }
+
+        .category-checkbox:checked+label {
+            background-color: #f97316;
+            color: white;
+            border-color: #f97316;
+        }
+
+        .video-thumbnail {
+            object-fit: cover;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+        }
+
+        .video-player-container {
+            position: relative;
+            width: 100%;
+            background: #000;
+            border-radius: 12px;
+            overflow: hidden;
+        }
+
+        .custom-controls {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: linear-gradient(transparent, rgba(0,0,0,0.8) 40%, rgba(0,0,0,0.95));
+            padding: 40px 12px 12px;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+            pointer-events: none;
+        }
+
+        .video-player-container:hover .custom-controls,
+        .custom-controls.visible {
+            opacity: 1;
+            pointer-events: all;
+        }
+
+        .progress-container {
+            width: 100%;
+            height: 3px;
+            background: rgba(255,255,255,0.2);
+            border-radius: 2px;
+            cursor: pointer;
+            margin-bottom: 8px;
+            transition: height 0.2s;
+        }
+
+        .progress-container:hover { height: 5px; }
+
+        .progress-bar {
+            height: 100%;
+            background: #f97316;
+            border-radius: 2px;
+            transition: width 0.1s linear;
+        }
+
+        .control-btn {
+            background: none;
+            border: none;
+            color: white;
+            cursor: pointer;
+            padding: 8px;
+            border-radius: 50%;
+            transition: background 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-width: 36px;
+            min-height: 36px;
+        }
+
+        .control-btn:hover { background: rgba(255,255,255,0.2); }
+
+        @media (max-width: 640px) {
+            .video-player-container {
+                border-radius: 0;
+                margin: -16px -16px 16px;
+                width: calc(100% + 32px);
+            }
+        }
+
+        .page {
+            display: none;
+        }
+        .page.active {
+            display: block;
+        }
+
+        .auth-input {
+            width: 100%;
+            padding: 12px 16px;
+            border: 2px solid #e5e5e5;
+            border-radius: 12px;
+            outline: none;
+            transition: border-color 0.3s;
+            font-size: 14px;
+        }
+        .dark .auth-input {
+            background: #272727;
+            border-color: #3f3f3f;
+            color: white;
+        }
+        .auth-input:focus {
+            border-color: #f97316;
+        }
+        
+        /* Estilos Novos para Auth */
+        .google-btn {
+            background: white;
+            color: #374151;
+            border: 1px solid #e5e5e5;
+            transition: all 0.2s;
+        }
+        .dark .google-btn {
+            background: #ffffff;
+            color: #1f2937;
+            border: none;
+        }
+        .google-btn:hover {
+            background: #f9fafb;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            transform: translateY(-1px);
+        }
+    </style>
+</head>
+<body class="bg-yt-light dark:bg-yt-dark text-gray-900 dark:text-gray-100 font-sans transition-colors duration-300 overflow-x-hidden">
+
+    <nav class="fixed top-0 left-0 right-0 h-14 sm:h-16 bg-yt-light/95 dark:bg-yt-dark/95 backdrop-blur-md border-b border-yt-lightBorder dark:border-yt-darkBorder flex items-center justify-between px-3 sm:px-4 z-50">
+        <div class="flex items-center gap-2 sm:gap-4">
+            <button id="btn-hamburger" onclick="toggleSidebar()" class="p-2 rounded-full hover:bg-yt-lightHover dark:hover:bg-yt-darkHover transition active:scale-95">
+                <i class="fas fa-bars text-lg sm:text-xl"></i>
+            </button>
+            <div class="flex items-center gap-1.5 sm:gap-2 cursor-pointer" onclick="navigateTo('home')">
+                <i class="fas fa-play-circle text-yt-brand text-2xl sm:text-3xl"></i>
+                <span class="text-lg sm:text-xl font-bold tracking-tighter">Anime<span class="text-yt-brand">Stream</span></span>
+            </div>
+        </div>
+
+        <div class="flex-1 max-w-xl px-2 sm:px-4 flex items-center">
+            <div class="flex w-full bg-yt-lightHover dark:bg-yt-darkHover rounded-full border border-yt-lightBorder dark:border-yt-darkBorder overflow-hidden focus-within:border-orange-500 transition-all duration-300">
+                <input type="text" id="search-input" placeholder="O que vamos assistir?" 
+                       class="w-full bg-transparent px-3 sm:px-5 py-2 sm:py-2.5 outline-none text-xs sm:text-sm min-w-0" 
+                       onkeyup="handleSearchInput(this.value)" autocomplete="off">
+                <button onclick="handleSearch()" class="px-3 sm:px-5 bg-gray-200 dark:bg-[#222] hover:bg-gray-300 dark:hover:bg-[#333] border-l border-yt-lightBorder dark:border-yt-darkBorder transition active:scale-95">
+                    <i class="fas fa-search text-sm sm:text-base"></i>
+                </button>
+            </div>
+        </div>
+
+        <div class="flex items-center gap-1 sm:gap-3">
+            <button onclick="toggleUploadModal(true)" class="hidden sm:flex items-center gap-1.5 bg-yt-brand text-white px-3 sm:px-4 py-1.5 sm:py-2 rounded-full font-medium text-xs sm:text-sm hover:brightness-110 transition active:scale-95">
+                <i class="fas fa-plus text-xs"></i>
+                <span>Criar</span>
+            </button>
+            <div id="user-avatar" class="w-8 h-8 sm:w-9 sm:h-9 rounded-full bg-gradient-to-br from-orange-400 to-yt-brand text-white flex items-center justify-center font-bold shadow-md cursor-pointer hover:scale-105 transition text-sm sm:text-base" onclick="navigateTo('profile')">
+                <i class="fas fa-user"></i>
+            </div>
+        </div>
+    </nav>
+
+    <div id="sidebar-overlay" onclick="toggleSidebar()" class="fixed inset-0 bg-black/70 z-40 hidden transition-opacity duration-300"></div>
+    <aside id="sidebar" class="fixed top-0 left-0 bottom-0 w-72 sm:w-64 bg-yt-light dark:bg-yt-dark border-r border-yt-lightBorder dark:border-yt-darkBorder overflow-y-auto z-40 transform -translate-x-full transition-transform duration-300 ease-in-out shadow-2xl pt-14 sm:pt-16">
+        <div class="py-2 sm:py-3 flex flex-col gap-0.5 sm:gap-1">
+            <a href="#" onclick="navigateTo('home'); toggleSidebar()" class="flex items-center px-5 sm:px-6 py-2.5 sm:py-3 hover:bg-yt-lightHover dark:hover:bg-yt-darkHover gap-3 sm:gap-4 rounded-lg mx-2 transition text-sm sm:text-base" data-page="home">
+                <i class="fas fa-home w-5 sm:w-6 text-center"></i>
+                <span class="font-medium">Início</span>
+            </a>
+            <a href="#" onclick="navigateTo('trending'); toggleSidebar()" class="flex items-center px-5 sm:px-6 py-2.5 sm:py-3 hover:bg-yt-lightHover dark:hover:bg-yt-darkHover gap-3 sm:gap-4 rounded-lg mx-2 transition text-sm sm:text-base" data-page="trending">
+                <i class="fas fa-fire w-5 sm:w-6 text-center"></i>
+                <span class="font-medium">Em Alta</span>
+            </a>
+            <div class="px-5 sm:px-6 py-2 sm:py-3 text-[10px] sm:text-xs font-bold text-gray-500 uppercase tracking-wider">Categorias</div>
+            <div id="sidebar-categories"></div>
+            <hr class="border-yt-lightBorder dark:border-yt-darkBorder my-2 sm:my-3 mx-3 sm:mx-4">
+            <div id="sidebar-auth-section"></div>
+            <hr class="border-yt-lightBorder dark:border-yt-darkBorder my-2 sm:my-3 mx-3 sm:mx-4">
+            <button onclick="toggleTheme()" class="w-full flex items-center px-5 sm:px-6 py-2.5 sm:py-3 hover:bg-yt-lightHover dark:hover:bg-yt-darkHover gap-3 sm:gap-4 text-left rounded-lg mx-2 transition text-sm sm:text-base">
+                <i id="theme-icon" class="fas fa-moon w-5 sm:w-6 text-center"></i>
+                <span id="theme-text" class="font-medium">Modo Escuro</span>
+            </button>
+        </div>
+    </aside>
+
+    <main id="main-content" class="pt-14 sm:pt-16 min-h-screen transition-all duration-300 pb-20 sm:pb-24">
+        
+        <div id="page-home" class="page active">
+            <div id="search-indicator" class="hidden bg-orange-50 dark:bg-orange-900/20 border-b border-orange-200 dark:border-orange-800 px-3 sm:px-4 py-2 text-xs sm:text-sm">
+                <span id="search-indicator-text"></span>
+                <button onclick="clearSearch()" class="ml-2 text-yt-brand hover:underline font-medium">Limpar</button>
+            </div>
+            <div class="sticky top-14 sm:top-16 bg-yt-light dark:bg-yt-dark/95 backdrop-blur z-30 py-2 sm:py-3 px-3 sm:px-4 border-b border-yt-lightBorder dark:border-yt-darkBorder flex gap-2 sm:gap-3 overflow-x-auto hide-scroll" id="category-chips"></div>
+            <div class="p-3 sm:p-4 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-3 sm:gap-5" id="video-grid"></div>
+            <div id="no-results" class="hidden text-center py-16 sm:py-20 px-4">
+                <i class="fas fa-video text-4xl sm:text-6xl text-gray-300 dark:text-gray-600 mb-3 sm:mb-4"></i>
+                <h3 class="text-lg sm:text-xl font-bold mb-1 sm:mb-2">Nenhum vídeo encontrado</h3>
+                <p class="text-xs sm:text-sm text-gray-500">Seja o primeiro a publicar!</p>
+            </div>
+        </div>
+
+        <div id="page-player" class="page">
+            <div class="max-w-[1600px] mx-auto">
+                <div class="flex flex-col lg:flex-row lg:gap-6 lg:p-6">
+                    <div class="lg:w-[70%]">
+                        <div class="video-player-container aspect-video" id="player-container">
+                            <video id="html-player" playsinline webkit-playsinline class="w-full h-full"></video>
+                            <div class="custom-controls" id="custom-controls">
+                                <div class="progress-container" id="progress-container" onclick="seekVideo(event)" ontouchstart="seekVideo(event)">
+                                    <div class="progress-bar" id="progress-bar" style="width: 0%"></div>
+                                </div>
+                                <div class="flex items-center justify-between">
+                                    <div class="flex items-center gap-1 sm:gap-2">
+                                        <button class="control-btn" onclick="togglePlay()" id="play-btn"><i class="fas fa-pause text-sm sm:text-base"></i></button>
+                                        <button class="control-btn hidden xs:flex" onclick="skipTime(-10)"><i class="fas fa-rotate-left text-xs sm:text-sm"></i><span class="text-[10px] sm:text-xs ml-1">10s</span></button>
+                                        <button class="control-btn hidden xs:flex" onclick="skipTime(10)"><span class="text-[10px] sm:text-xs mr-1">10s</span><i class="fas fa-rotate-right text-xs sm:text-sm"></i></button>
+                                        <span class="text-white text-[10px] sm:text-xs ml-1" id="time-display">0:00 / 0:00</span>
+                                    </div>
+                                    <div class="flex items-center gap-1 sm:gap-2">
+                                        <button class="control-btn" onclick="changePlaybackSpeed()" id="speed-btn"><span class="text-[10px] sm:text-xs font-bold">1x</span></button>
+                                        <button class="control-btn" onclick="toggleFullscreen()"><i class="fas fa-expand text-xs sm:text-sm"></i></button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="px-3 sm:px-0 mt-3 sm:mt-4">
+                            <div class="flex items-center justify-between">
+                                <h1 id="player-title" class="text-lg sm:text-2xl font-bold leading-tight flex-1"></h1>
+                                <div id="player-edit-buttons" class="hidden flex gap-2 ml-2"></div>
+                            </div>
+                            <div class="flex flex-col sm:flex-row sm:items-center justify-between mt-3 sm:mt-4 gap-3">
+                                <div class="flex items-center gap-2 sm:gap-3">
+                                    <div class="w-9 h-9 sm:w-10 sm:h-10 rounded-full bg-gradient-to-br from-orange-400 to-yt-brand flex items-center justify-center text-white font-bold text-sm flex-shrink-0" id="player-uploader-avatar">U</div>
+                                    <div class="min-w-0">
+                                        <p class="font-bold text-sm sm:text-base truncate" id="player-uploader-name">Uploader</p>
+                                        <p class="text-[10px] sm:text-xs text-gray-500" id="player-uploader-subs">0 inscritos</p>
+                                    </div>
+                                </div>
+                                <div class="flex items-center gap-1.5 sm:gap-2 flex-wrap">
+                                    <button id="btn-follow" onclick="toggleFollow()" class="bg-white text-black px-4 sm:px-6 py-2 sm:py-2.5 rounded-full font-bold text-xs sm:text-sm hover:bg-gray-200 transition active:scale-95 flex items-center gap-1.5">
+                                        <i class="fas fa-bell text-xs"></i> <span id="btn-follow-text">Inscrever-se</span>
+                                    </button>
+                                    <div class="flex bg-gray-200 dark:bg-yt-darkHover rounded-full overflow-hidden">
+                                        <button id="btn-like" onclick="toggleLike()" class="px-3 sm:px-4 py-2 sm:py-2.5 hover:bg-gray-300 dark:hover:bg-yt-darkBorder transition flex items-center gap-1.5 text-xs sm:text-sm font-medium">
+                                            <i class="fas fa-thumbs-up"></i> <span id="likes-count">0</span>
+                                        </button>
+                                        <div class="w-px bg-gray-300 dark:bg-gray-600"></div>
+                                        <button onclick="toggleDislike()" class="px-3 sm:px-4 py-2 sm:py-2.5 hover:bg-gray-300 dark:hover:bg-yt-darkBorder transition">
+                                            <i class="fas fa-thumbs-down text-xs sm:text-sm"></i>
+                                        </button>
+                                    </div>
+                                    <button onclick="shareVideo()" class="bg-gray-200 dark:bg-yt-darkHover px-3 sm:px-4 py-2 sm:py-2.5 rounded-full hover:bg-gray-300 dark:hover:bg-yt-darkBorder transition flex items-center gap-1.5 text-xs sm:text-sm font-medium">
+                                        <i class="fas fa-share"></i> <span class="hidden xs:inline">Compartilhar</span>
+                                    </button>
+                                    <button onclick="reportVideo()" class="bg-gray-200 dark:bg-yt-darkHover px-3 sm:px-4 py-2 sm:py-2.5 rounded-full hover:bg-gray-300 dark:hover:bg-yt-darkBorder transition flex items-center gap-1.5 text-xs sm:text-sm font-medium">
+                                        <i class="fas fa-flag"></i> <span class="hidden xs:inline">Denunciar</span>
+                                    </button>
+                                </div>
+                            </div>
+                            <div class="mt-3 sm:mt-4 p-3 sm:p-5 bg-gray-100 dark:bg-yt-darkHover rounded-xl sm:rounded-2xl">
+                                <p id="player-desc" class="text-xs sm:text-sm leading-relaxed whitespace-pre-line"></p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="lg:w-[30%] mt-4 lg:mt-0 px-3 pb-3 sm:px-0" id="recommended-list"></div>
+                </div>
+                <div class="fixed top-14 sm:top-16 left-0 right-0 bg-yt-light/95 dark:bg-yt-dark/95 backdrop-blur-md border-b border-yt-lightBorder dark:border-yt-darkBorder px-3 py-1.5 z-20 lg:hidden">
+                    <button onclick="navigateTo('home')" class="flex items-center gap-1.5 text-yt-brand hover:underline text-sm font-medium">
+                        <i class="fas fa-arrow-left"></i> Voltar
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <div id="page-profile" class="page p-4 max-w-4xl mx-auto">
+            <div id="profile-content"></div>
+        </div>
+
+        <div id="page-auth" class="page p-4 max-w-md mx-auto mt-8 sm:mt-12">
+            <div id="auth-content" class="bg-white dark:bg-yt-darkHover p-6 sm:p-8 rounded-3xl shadow-xl border border-yt-lightBorder dark:border-yt-darkBorder slide-up">
+                </div>
+        </div>
+
+        <div id="page-trending" class="page p-4">
+            <h2 class="text-2xl font-bold mb-6"><i class="fas fa-fire text-yt-brand"></i> Em Alta</h2>
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4" id="trending-grid"></div>
+        </div>
+
+    </main>
+
+    <footer id="app-footer" class="fixed bottom-0 left-0 right-0 h-14 sm:h-16 bg-yt-light/95 dark:bg-yt-dark/95 backdrop-blur-md border-t border-yt-lightBorder dark:border-yt-darkBorder flex items-center justify-around px-2 z-50 lg:hidden">
+        <button onclick="navigateTo('home')" class="flex flex-col items-center text-gray-500 hover:text-yt-brand transition active:scale-90" data-page="home">
+            <i class="fas fa-home text-lg"></i>
+            <span class="text-[9px] sm:text-[10px]">Início</span>
+        </button>
+        <button onclick="navigateTo('trending')" class="flex flex-col items-center text-gray-500 hover:text-yt-brand transition active:scale-90" data-page="trending">
+            <i class="fas fa-fire text-lg"></i>
+            <span class="text-[9px] sm:text-[10px]">Em Alta</span>
+        </button>
+        <div class="relative -top-4 sm:-top-5">
+            <button onclick="toggleUploadModal(true)" class="w-12 h-12 sm:w-14 sm:h-14 bg-yt-brand text-white rounded-full shadow-2xl flex items-center justify-center text-xl sm:text-2xl border-[3px] border-yt-light dark:border-yt-dark hover:scale-105 active:scale-90 transition-all">
+                <i class="fas fa-plus"></i>
+            </button>
+        </div>
+        <button onclick="navigateTo('profile')" class="flex flex-col items-center text-gray-500 hover:text-yt-brand transition active:scale-90" data-page="profile">
+            <i class="fas fa-bookmark text-lg"></i>
+            <span class="text-[9px] sm:text-[10px]">Biblioteca</span>
+        </button>
+        <button onclick="toggleTheme()" class="flex flex-col items-center text-gray-500 hover:text-yt-brand transition active:scale-90">
+            <i id="theme-icon-mobile" class="fas fa-moon text-lg"></i>
+            <span class="text-[9px] sm:text-[10px]">Tema</span>
+        </button>
+    </footer>
+
+    <div id="modal-upload" class="fixed inset-0 z-[100] hidden flex items-end sm:items-center justify-center p-0 sm:p-4">
+        <div class="fixed inset-0 modal-overlay" onclick="toggleUploadModal(false)"></div>
+        <div class="bg-white dark:bg-yt-dark w-full sm:max-w-lg sm:rounded-2xl shadow-2xl z-10 overflow-hidden slide-up border-t sm:border border-yt-lightBorder dark:border-yt-darkBorder max-h-[85vh] sm:max-h-[90vh] flex flex-col rounded-t-2xl sm:rounded-2xl">
+            <div class="p-4 sm:p-6 border-b border-yt-lightBorder dark:border-yt-darkBorder flex justify-between items-center bg-white dark:bg-yt-dark sticky top-0">
+                <h2 class="text-lg sm:text-xl font-bold flex items-center gap-2"><i class="fas fa-cloud-upload-alt text-yt-brand"></i> Enviar vídeo</h2>
+                <button onclick="toggleUploadModal(false)" class="p-2 hover:bg-gray-200 dark:hover:bg-yt-darkHover rounded-full transition active:scale-90"><i class="fas fa-times text-lg"></i></button>
+            </div>
+            <div class="p-4 sm:p-6 overflow-y-auto flex-1 space-y-4 sm:space-y-5 bg-gray-50 dark:bg-[#1a1a1a]">
+                <div class="bg-black rounded-xl overflow-hidden border-2 border-dashed border-gray-300 dark:border-gray-600">
+                    <div id="thumbnail-preview" class="aspect-video flex items-center justify-center bg-gray-900">
+                        <div class="text-center"><i class="fas fa-image text-4xl sm:text-5xl text-gray-600 mb-2"></i><p class="text-xs text-gray-500">Pré-visualização da thumbnail</p></div>
+                    </div>
+                </div>
+                <div class="space-y-4">
+                    <div>
+                        <label class="block text-[10px] sm:text-xs font-bold text-gray-600 dark:text-gray-400 mb-1.5 uppercase tracking-wider"><i class="fas fa-link text-yt-brand mr-1"></i> URL do Vídeo</label>
+                        <input type="text" id="up-url" placeholder="https://exemplo.com/video.mp4" class="w-full bg-white dark:bg-yt-darkHover border border-yt-lightBorder dark:border-yt-darkBorder rounded-xl px-3 sm:px-4 py-2.5 sm:py-3 text-xs sm:text-sm outline-none focus:border-yt-brand focus:ring-2 focus:ring-orange-500/20 transition" oninput="previewThumbnail(this.value)">
+                    </div>
+                    <div>
+                        <label class="block text-[10px] sm:text-xs font-bold text-gray-600 dark:text-gray-400 mb-1.5 uppercase tracking-wider"><i class="fas fa-heading text-yt-brand mr-1"></i> Título</label>
+                        <input type="text" id="up-title" placeholder="Adicione um título descritivo" class="w-full bg-white dark:bg-yt-darkHover border border-yt-lightBorder dark:border-yt-darkBorder rounded-xl px-3 sm:px-4 py-2.5 sm:py-3 text-xs sm:text-sm outline-none focus:border-yt-brand focus:ring-2 focus:ring-orange-500/20 transition">
+                    </div>
+                </div>
+                <div>
+                    <label class="block text-[10px] sm:text-xs font-bold text-gray-600 dark:text-gray-400 mb-1.5 uppercase tracking-wider"><i class="fas fa-align-left text-yt-brand mr-1"></i> Descrição</label>
+                    <textarea id="up-desc" placeholder="Conte mais sobre seu vídeo..." rows="3" class="w-full bg-white dark:bg-yt-darkHover border border-yt-lightBorder dark:border-yt-darkBorder rounded-xl px-3 sm:px-4 py-2.5 sm:py-3 text-xs sm:text-sm outline-none focus:border-yt-brand focus:ring-2 focus:ring-orange-500/20 transition resize-none"></textarea>
+                </div>
+                <div>
+                    <label class="block text-[10px] sm:text-xs font-bold text-gray-600 dark:text-gray-400 mb-2 uppercase tracking-wider"><i class="fas fa-tags text-yt-brand mr-1"></i> Categorias</label>
+                    <div class="flex flex-wrap gap-2" id="up-categories"></div>
+                </div>
+            </div>
+            <div class="p-4 sm:p-5 bg-white dark:bg-yt-dark border-t border-yt-lightBorder dark:border-yt-darkBorder flex justify-end gap-2 sm:gap-3 sticky bottom-0">
+                <button onclick="toggleUploadModal(false)" class="px-4 sm:px-6 py-2 sm:py-2.5 rounded-full font-bold text-xs sm:text-sm hover:bg-gray-200 dark:hover:bg-yt-darkHover transition active:scale-95">Cancelar</button>
+                <button onclick="handleUpload()" class="bg-yt-brand text-white font-bold px-6 sm:px-8 py-2 sm:py-2.5 rounded-full hover:brightness-110 transition active:scale-95 shadow-lg shadow-orange-500/20 flex items-center gap-1.5 text-xs sm:text-sm"><i class="fas fa-upload"></i> Publicar</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="modal-edit-video" class="fixed inset-0 z-[100] hidden flex items-end sm:items-center justify-center p-0 sm:p-4">
+        <div class="fixed inset-0 modal-overlay" onclick="toggleEditModal(false)"></div>
+        <div class="bg-white dark:bg-yt-dark w-full sm:max-w-lg sm:rounded-2xl shadow-2xl z-10 overflow-hidden slide-up border-t sm:border border-yt-lightBorder dark:border-yt-darkBorder max-h-[85vh] sm:max-h-[90vh] flex flex-col rounded-t-2xl sm:rounded-2xl">
+            <div class="p-4 sm:p-6 border-b border-yt-lightBorder dark:border-yt-darkBorder flex justify-between items-center bg-white dark:bg-yt-dark sticky top-0">
+                <h2 class="text-lg sm:text-xl font-bold"><i class="fas fa-edit text-yt-brand"></i> Editar vídeo</h2>
+                <button onclick="toggleEditModal(false)" class="p-2 hover:bg-gray-200 dark:hover:bg-yt-darkHover rounded-full transition active:scale-90"><i class="fas fa-times text-lg"></i></button>
+            </div>
+            <div class="p-4 sm:p-6 overflow-y-auto flex-1 space-y-4 sm:space-y-5 bg-gray-50 dark:bg-[#1a1a1a]">
+                <input type="hidden" id="edit-video-id">
+                <div>
+                    <label class="block text-[10px] sm:text-xs font-bold text-gray-600 dark:text-gray-400 mb-1.5 uppercase tracking-wider">Título</label>
+                    <input type="text" id="edit-title" class="w-full bg-white dark:bg-yt-darkHover border border-yt-lightBorder dark:border-yt-darkBorder rounded-xl px-3 sm:px-4 py-2.5 sm:py-3 text-xs sm:text-sm outline-none focus:border-yt-brand focus:ring-2 focus:ring-orange-500/20 transition">
+                </div>
+                <div>
+                    <label class="block text-[10px] sm:text-xs font-bold text-gray-600 dark:text-gray-400 mb-1.5 uppercase tracking-wider">Descrição</label>
+                    <textarea id="edit-desc" rows="3" class="w-full bg-white dark:bg-yt-darkHover border border-yt-lightBorder dark:border-yt-darkBorder rounded-xl px-3 sm:px-4 py-2.5 sm:py-3 text-xs sm:text-sm outline-none focus:border-yt-brand focus:ring-2 focus:ring-orange-500/20 transition resize-none"></textarea>
+                </div>
+                <div>
+                    <label class="block text-[10px] sm:text-xs font-bold text-gray-600 dark:text-gray-400 mb-2 uppercase tracking-wider">Categorias</label>
+                    <div class="flex flex-wrap gap-2" id="edit-categories"></div>
+                </div>
+            </div>
+            <div class="p-4 sm:p-5 bg-white dark:bg-yt-dark border-t border-yt-lightBorder dark:border-yt-darkBorder flex justify-between sticky bottom-0">
+                <button onclick="deleteVideo()" class="px-4 sm:px-6 py-2 sm:py-2.5 rounded-full font-bold text-xs sm:text-sm bg-red-500 text-white hover:bg-red-600 transition active:scale-95"><i class="fas fa-trash"></i> Excluir</button>
+                <div class="flex gap-2 sm:gap-3">
+                    <button onclick="toggleEditModal(false)" class="px-4 sm:px-6 py-2 sm:py-2.5 rounded-full font-bold text-xs sm:text-sm hover:bg-gray-200 dark:hover:bg-yt-darkHover transition active:scale-95">Cancelar</button>
+                    <button onclick="saveEditVideo()" class="bg-yt-brand text-white font-bold px-6 sm:px-8 py-2 sm:py-2.5 rounded-full hover:brightness-110 transition active:scale-95 shadow-lg shadow-orange-500/20 text-xs sm:text-sm"><i class="fas fa-save"></i> Salvar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="modal-report" class="fixed inset-0 z-[100] hidden flex items-end sm:items-center justify-center p-0 sm:p-4">
+        <div class="fixed inset-0 modal-overlay" onclick="toggleReportModal(false)"></div>
+        <div class="bg-white dark:bg-yt-dark w-full sm:max-w-md sm:rounded-2xl shadow-2xl z-10 overflow-hidden slide-up border-t sm:border border-yt-lightBorder dark:border-yt-darkBorder rounded-t-2xl sm:rounded-2xl">
+            <div class="p-4 sm:p-6 border-b border-yt-lightBorder dark:border-yt-darkBorder flex justify-between items-center bg-white dark:bg-yt-dark">
+                <h2 class="text-lg sm:text-xl font-bold flex items-center gap-2"><i class="fas fa-flag text-red-500"></i> Denunciar vídeo</h2>
+                <button onclick="toggleReportModal(false)" class="p-2 hover:bg-gray-200 dark:hover:bg-yt-darkHover rounded-full transition"><i class="fas fa-times text-lg"></i></button>
+            </div>
+            <div class="p-4 sm:p-6 space-y-3">
+                <p class="text-sm text-gray-500">Selecione o motivo da denúncia:</p>
+                <select id="report-reason" class="w-full auth-input">
+                    <option value="">Selecione um motivo...</option>
+                    <option value="Conteúdo impróprio">Conteúdo impróprio</option>
+                    <option value="Violência">Violência</option>
+                    <option value="Discurso de ódio">Discurso de ódio</option>
+                    <option value="Spam">Spam</option>
+                    <option value="Direitos autorais">Direitos autorais</option>
+                    <option value="Outro">Outro</option>
+                </select>
+                <textarea id="report-details" placeholder="Descreva o problema (opcional)" rows="3" class="w-full auth-input resize-none"></textarea>
+            </div>
+            <div class="p-4 sm:p-5 bg-gray-50 dark:bg-yt-dark border-t border-yt-lightBorder dark:border-yt-darkBorder flex justify-end gap-2 sm:gap-3">
+                <button onclick="toggleReportModal(false)" class="px-4 sm:px-6 py-2 sm:py-2.5 rounded-full font-bold text-xs sm:text-sm hover:bg-gray-200 dark:hover:bg-yt-darkHover transition">Cancelar</button>
+                <button onclick="submitReport()" class="bg-red-500 text-white font-bold px-6 sm:px-8 py-2 sm:py-2.5 rounded-full hover:bg-red-600 transition active:scale-95 text-xs sm:text-sm"><i class="fas fa-paper-plane"></i> Enviar</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="toast" class="fixed bottom-20 sm:bottom-24 left-1/2 transform -translate-x-1/2 bg-gray-900/95 text-white px-4 sm:px-6 py-3 sm:py-3.5 rounded-full shadow-2xl z-[60] flex items-center gap-2 sm:gap-3 transition-all duration-400 opacity-0 translate-y-10 pointer-events-none border border-white/10 backdrop-blur-md">
+        <i id="toast-icon" class="fas fa-check-circle text-green-400 text-sm sm:text-base"></i>
+        <span id="toast-msg" class="text-xs sm:text-sm font-semibold whitespace-nowrap"></span>
+    </div>
+
+    <script>
+        // Estado global
+        let state = {
+            theme: 'dark',
+            selectedCategory: 'all',
+            sidebarOpen: false,
+            currentSearch: '',
+            isPlaying: false,
+            currentSpeed: 1,
+            playerInterval: null,
+            currentUser: null,
+            currentVideoId: null,
+            currentVideoData: null,
+            allVideos: [],
+            following: [],
+            categories: [
+                { id: 'anime', name: 'Anime', icon: 'fas fa-dragon' },
+                { id: 'amv', name: 'AMV', icon: 'fas fa-music' },
+                { id: 'tutorial', name: 'Tutoriais', icon: 'fas fa-graduation-cap' },
+                { id: 'review', name: 'Reviews', icon: 'fas fa-star' },
+                { id: 'live', name: 'Lives', icon: 'fas fa-broadcast-tower' },
+                { id: 'news', name: 'Notícias', icon: 'fas fa-newspaper' }
+            ]
+        };
+
+        // Funções de Inicialização
+        async function init() {
+            setupTheme();
+            setupAuthListener();
+            renderCategories();
+            loadVideos();
+            setupPlayerListeners();
+        }
+
+        function setupTheme() {
+            const saved = localStorage.getItem('theme') || 'dark';
+            state.theme = saved;
+            applyTheme();
+        }
+
+        function applyTheme() {
+            const html = document.documentElement;
+            const icon = document.getElementById('theme-icon');
+            const iconMobile = document.getElementById('theme-icon-mobile');
+            const text = document.getElementById('theme-text');
+
+            if (state.theme === 'dark') {
+                html.classList.add('dark');
+                icon.className = 'fas fa-sun w-6 text-center';
+                iconMobile.className = 'fas fa-sun text-lg';
+                text.innerText = 'Modo Claro';
+            } else {
+                html.classList.remove('dark');
+                icon.className = 'fas fa-moon w-6 text-center';
+                iconMobile.className = 'fas fa-moon text-lg';
+                text.innerText = 'Modo Escuro';
+            }
+        }
+
+        function toggleTheme() {
+            state.theme = state.theme === 'dark' ? 'light' : 'dark';
+            localStorage.setItem('theme', state.theme);
+            applyTheme();
+        }
+
+        function setupAuthListener() {
+            window.auth.onAuthStateChanged(user => {
+                state.currentUser = user;
+                updateAuthUI();
+                if (user) loadFollowing();
+            });
+        }
+
+        function updateAuthUI() {
+            const sidebarSection = document.getElementById('sidebar-auth-section');
+            const avatar = document.getElementById('user-avatar');
+
+            if (state.currentUser) {
+                avatar.innerHTML = state.currentUser.photoURL 
+                    ? `<img src="${state.currentUser.photoURL}" class="w-full h-full rounded-full object-cover">`
+                    : state.currentUser.displayName ? state.currentUser.displayName[0].toUpperCase() : 'U';
+                
+                sidebarSection.innerHTML = `
+                    <div class="px-6 py-2 flex items-center gap-3">
+                        <div class="w-8 h-8 rounded-full bg-yt-brand flex items-center justify-center text-white font-bold overflow-hidden">
+                            ${state.currentUser.photoURL ? `<img src="${state.currentUser.photoURL}" class="w-full h-full object-cover">` : (state.currentUser.displayName ? state.currentUser.displayName[0] : 'U')}
+                        </div>
+                        <div class="min-w-0">
+                            <p class="text-sm font-bold truncate">${state.currentUser.displayName || 'Usuário'}</p>
+                            <button onclick="handleLogout()" class="text-[10px] text-yt-brand hover:underline font-bold uppercase tracking-wider">Sair da conta</button>
+                        </div>
+                    </div>
+                `;
+            } else {
+                avatar.innerHTML = '<i class="fas fa-user"></i>';
+                sidebarSection.innerHTML = `
+                    <div class="px-4 py-3">
+                        <p class="text-xs text-gray-500 mb-3 px-2 leading-relaxed">Faça login para curtir vídeos, comentar e se inscrever.</p>
+                        <button onclick="navigateTo('auth')" class="w-full flex items-center justify-center gap-2 border border-yt-lightBorder dark:border-yt-darkBorder py-2.5 rounded-full text-yt-brand font-bold hover:bg-orange-500/10 transition active:scale-95 text-sm">
+                            <i class="fas fa-user-circle"></i> Fazer login
+                        </button>
+                    </div>
+                `;
+            }
+            
+            if (document.getElementById('page-auth').classList.contains('active')) renderAuthPage();
+            if (document.getElementById('page-profile').classList.contains('active')) renderProfile();
+        }
+
+        // Navegação
+        function navigateTo(pageId, data = null) {
+            document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+            document.getElementById(`page-${pageId}`).classList.add('active');
+            window.scrollTo(0, 0);
+
+            // Atualiza links da sidebar/footer
+            document.querySelectorAll(`[data-page]`).forEach(link => {
+                const isActive = link.getAttribute('data-page') === pageId;
+                link.classList.toggle('text-yt-brand', isActive);
+                if (!link.classList.contains('flex-col')) { // Sidebar links
+                    link.classList.toggle('bg-yt-lightHover', isActive);
+                    link.classList.toggle('dark:bg-yt-darkHover', isActive);
+                }
+            });
+
+            if (pageId !== 'player') {
+                const player = document.getElementById('html-player');
+                player.pause();
+                state.isPlaying = false;
+                updatePlayButton();
+            }
+
+            if (pageId === 'auth') renderAuthPage();
+            if (pageId === 'profile') renderProfile();
+            if (pageId === 'trending') renderTrending();
+        }
+
+        // Renderização de Categorias
+        function renderCategories() {
+            const sidebar = document.getElementById('sidebar-categories');
+            const chips = document.getElementById('category-chips');
+            const uploadCats = document.getElementById('up-categories');
+            const editCats = document.getElementById('edit-categories');
+
+            const allChips = `<button onclick="filterCategory('all')" class="chip px-4 py-1.5 rounded-lg bg-gray-200 dark:bg-yt-darkHover hover:bg-gray-300 dark:hover:bg-yt-darkBorder transition whitespace-nowrap text-xs sm:text-sm font-medium ${state.selectedCategory === 'all' ? 'bg-yt-brand text-white dark:bg-yt-brand' : ''}">Tudo</button>` + 
+                state.categories.map(cat => `
+                <button onclick="filterCategory('${cat.id}')" class="chip px-4 py-1.5 rounded-lg bg-gray-200 dark:bg-yt-darkHover hover:bg-gray-300 dark:hover:bg-yt-darkBorder transition whitespace-nowrap text-xs sm:text-sm font-medium ${state.selectedCategory === cat.id ? 'bg-yt-brand text-white dark:bg-yt-brand' : ''}">${cat.name}</button>
+            `).join('');
+            
+            chips.innerHTML = allChips;
+
+            sidebar.innerHTML = state.categories.map(cat => `
+                <a href="#" onclick="filterCategory('${cat.id}'); toggleSidebar()" class="flex items-center px-6 py-3 hover:bg-yt-lightHover dark:hover:bg-yt-darkHover gap-4 rounded-lg mx-2 transition text-sm">
+                    <i class="${cat.icon} w-6 text-center"></i>
+                    <span class="font-medium">${cat.name}</span>
+                </a>
+            `).join('');
+
+            const catInputs = state.categories.map(cat => `
+                <div class="relative">
+                    <input type="checkbox" id="cat-${cat.id}" value="${cat.id}" class="category-checkbox hidden">
+                    <label for="cat-${cat.id}" class="px-4 py-2 rounded-full border border-yt-lightBorder dark:border-yt-darkBorder text-xs font-bold cursor-pointer hover:border-yt-brand transition block">${cat.name}</label>
+                </div>
+            `).join('');
+
+            uploadCats.innerHTML = catInputs;
+            editCats.innerHTML = catInputs.replace(/cat-/g, 'edit-cat-');
+        }
+
+        function filterCategory(catId) {
+            state.selectedCategory = catId;
+            renderCategories();
+            renderVideoGrid();
+            navigateTo('home');
+        }
+
+        // Gestão de Vídeos
+        async function loadVideos() {
+            try {
+                const q = window.firestoreHelpers.query(
+                    window.firestoreHelpers.collection(window.db, 'videos'),
+                    window.firestoreHelpers.orderBy('createdAt', 'desc')
+                );
+                const snapshot = await window.firestoreHelpers.getDocs(q);
+                state.allVideos = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+                renderVideoGrid();
+            } catch (error) {
+                console.error("Erro ao carregar vídeos:", error);
+            }
+        }
+
+        function renderVideoGrid() {
+            const grid = document.getElementById('video-grid');
+            const noResults = document.getElementById('no-results');
+            
+            let filtered = state.allVideos;
+            if (state.selectedCategory !== 'all') {
+                filtered = filtered.filter(v => v.categories && v.categories.includes(state.selectedCategory));
+            }
+            if (state.currentSearch) {
+                const s = state.currentSearch.toLowerCase();
+                filtered = filtered.filter(v => v.title.toLowerCase().includes(s) || (v.description && v.description.toLowerCase().includes(s)));
+            }
+
+            if (filtered.length === 0) {
+                grid.innerHTML = '';
+                noResults.classList.remove('hidden');
+                return;
+            }
+
+            noResults.classList.add('hidden');
+            grid.innerHTML = filtered.map(v => `
+                <div class="group cursor-pointer fade-in" onclick="openVideo('${v.id}')">
+                    <div class="relative aspect-video bg-gray-200 dark:bg-yt-darkHover rounded-xl overflow-hidden mb-3 shadow-sm group-hover:shadow-md transition-all duration-300">
+                        <video class="video-thumbnail" src="${v.url}#t=1"></video>
+                        <div class="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors flex items-center justify-center">
+                            <i class="fas fa-play text-white opacity-0 group-hover:opacity-100 transition-opacity text-2xl drop-shadow-lg"></i>
+                        </div>
+                        <div class="absolute bottom-2 right-2 bg-black/80 text-white text-[10px] font-bold px-1.5 py-0.5 rounded">
+                            <i class="fas fa-clock mr-1"></i> Video
+                        </div>
+                    </div>
+                    <div class="flex gap-3">
+                        <div class="w-9 h-9 rounded-full bg-gradient-to-br from-orange-400 to-yt-brand flex-shrink-0 flex items-center justify-center text-white font-bold text-sm shadow-inner">
+                            ${v.uploaderName ? v.uploaderName[0].toUpperCase() : 'U'}
+                        </div>
+                        <div class="min-w-0">
+                            <h3 class="font-bold text-sm sm:text-base leading-snug line-clamp-2 group-hover:text-yt-brand transition-colors mb-1">${v.title}</h3>
+                            <p class="text-xs text-gray-500 font-medium truncate">${v.uploaderName || 'Uploader'}</p>
+                            <p class="text-[11px] text-gray-400 mt-0.5">${v.views || 0} visualizações • ${formatDate(v.createdAt)}</p>
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        // Funções de Auth e UI
+        function renderAuthPage(isRegister = false) {
+            const content = document.getElementById('auth-content');
+            
+            if (isRegister) {
+                content.innerHTML = `
+                    <div class="text-center mb-8">
+                        <i class="fas fa-user-plus text-4xl text-yt-brand mb-4"></i>
+                        <h2 class="text-2xl font-black">Crie sua conta</h2>
+                        <p class="text-gray-500 text-sm mt-1">Junte-se à maior comunidade de streaming!</p>
+                    </div>
+                    
+                    <div class="space-y-4">
+                        <button onclick="handleGoogleLogin()" class="google-btn w-full flex items-center justify-center gap-3 py-3 rounded-xl font-bold text-sm">
+                            <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" class="w-5 h-5">
+                            Continuar com Google
+                        </button>
+                        
+                        <div class="flex items-center gap-4 my-6">
+                            <div class="flex-1 h-px bg-gray-200 dark:bg-yt-darkBorder"></div>
+                            <span class="text-xs text-gray-400 font-bold uppercase">ou</span>
+                            <div class="flex-1 h-px bg-gray-200 dark:bg-yt-darkBorder"></div>
+                        </div>
+
+                        <div class="space-y-3">
+                            <div class="relative">
+                                <i class="fas fa-user absolute left-4 top-1/2 -translate-y-1/2 text-gray-400"></i>
+                                <input type="text" id="reg-name" placeholder="Como quer ser chamado?" class="auth-input pl-11">
+                            </div>
+                            <div class="relative">
+                                <i class="fas fa-envelope absolute left-4 top-1/2 -translate-y-1/2 text-gray-400"></i>
+                                <input type="email" id="reg-email" placeholder="Seu melhor e-mail" class="auth-input pl-11">
+                            </div>
+                            <div class="relative">
+                                <i class="fas fa-lock absolute left-4 top-1/2 -translate-y-1/2 text-gray-400"></i>
+                                <input type="password" id="reg-pass" placeholder="Crie uma senha forte" class="auth-input pl-11">
+                            </div>
+                        </div>
+
+                        <button onclick="handleRegister()" class="w-full bg-yt-brand text-white py-3.5 rounded-xl font-black text-sm hover:brightness-110 active:scale-95 transition-all shadow-lg shadow-orange-500/20 mt-2">
+                            CRIAR MINHA CONTA
+                        </button>
+                        
+                        <p class="text-center text-xs text-gray-500 mt-6">
+                            Já tem uma conta? 
+                            <button onclick="renderAuthPage(false)" class="text-yt-brand font-bold hover:underline">Faça login agora</button>
+                        </p>
+                    </div>
+                `;
+            } else {
+                content.innerHTML = `
+                    <div class="text-center mb-8">
+                        <i class="fas fa-play-circle text-5xl text-yt-brand mb-4"></i>
+                        <h2 class="text-2xl font-black">Bem-vindo de volta!</h2>
+                        <p class="text-gray-500 text-sm mt-1">Sentimos sua falta no AnimeStream.</p>
+                    </div>
+                    
+                    <div class="space-y-4">
+                        <button onclick="handleGoogleLogin()" class="google-btn w-full flex items-center justify-center gap-3 py-3 rounded-xl font-bold text-sm">
+                            <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" class="w-5 h-5">
+                            Entrar com Google
+                        </button>
+
+                        <div class="flex items-center gap-4 my-6">
+                            <div class="flex-1 h-px bg-gray-200 dark:bg-yt-darkBorder"></div>
+                            <span class="text-xs text-gray-400 font-bold uppercase">ou</span>
+                            <div class="flex-1 h-px bg-gray-200 dark:bg-yt-darkBorder"></div>
+                        </div>
+
+                        <div class="space-y-3">
+                            <div class="relative">
+                                <i class="fas fa-envelope absolute left-4 top-1/2 -translate-y-1/2 text-gray-400"></i>
+                                <input type="email" id="login-email" placeholder="E-mail" class="auth-input pl-11">
+                            </div>
+                            <div class="relative">
+                                <i class="fas fa-lock absolute left-4 top-1/2 -translate-y-1/2 text-gray-400"></i>
+                                <input type="password" id="login-pass" placeholder="Senha" class="auth-input pl-11">
+                            </div>
+                        </div>
+
+                        <button onclick="handleLogin()" class="w-full bg-yt-brand text-white py-3.5 rounded-xl font-black text-sm hover:brightness-110 active:scale-95 transition-all shadow-lg shadow-orange-500/20 mt-2">
+                            ACESSAR CONTA
+                        </button>
+                        
+                        <div class="flex flex-col items-center gap-4 mt-6">
+                            <button onclick="showToast('Em desenvolvimento', 'info')" class="text-xs text-gray-400 hover:text-yt-brand transition">Esqueceu sua senha?</button>
+                            <p class="text-xs text-gray-500">
+                                Não é membro ainda? 
+                                <button onclick="renderAuthPage(true)" class="text-yt-brand font-bold hover:underline">Cadastre-se grátis</button>
+                            </p>
+                        </div>
+                    </div>
+                `;
+            }
+        }
+
+        async function handleGoogleLogin() {
+            const provider = new window.GoogleAuthProvider();
+            try {
+                const result = await window.signInWithPopup(window.auth, provider);
+                showToast(`Bem-vindo, ${result.user.displayName}!`);
+                navigateTo('home');
+            } catch (error) {
+                console.error(error);
+                showToast('Falha no login com Google', 'error');
+            }
+        }
+
+        async function handleRegister() {
+            const name = document.getElementById('reg-name').value;
+            const email = document.getElementById('reg-email').value;
+            const pass = document.getElementById('reg-pass').value;
+
+            if (!name || !email || !pass) return showToast('Preencha todos os campos', 'error');
+
+            try {
+                const cred = await window.auth.createUserWithEmailAndPassword(email, pass);
+                await cred.user.updateProfile({ displayName: name });
+                showToast('Conta criada com sucesso!');
+                navigateTo('home');
+            } catch (error) {
+                showToast('Erro ao criar conta: ' + error.message, 'error');
+            }
+        }
+
+        async function handleLogin() {
+            const email = document.getElementById('login-email').value;
+            const pass = document.getElementById('login-pass').value;
+
+            try {
+                await window.auth.signInWithEmailAndPassword(email, pass);
+                showToast('Login realizado!');
+                navigateTo('home');
+            } catch (error) {
+                showToast('E-mail ou senha incorretos', 'error');
+            }
+        }
+
+        async function handleLogout() {
+            await window.auth.signOut();
+            showToast('Você saiu da conta', 'info');
+            navigateTo('home');
+        }
+
+        // Jogador de Vídeo
+        async function openVideo(id) {
+            state.currentVideoId = id;
+            const video = state.allVideos.find(v => v.id === id);
+            if (!video) return;
+
+            state.currentVideoData = video;
+            navigateTo('player');
+
+            const player = document.getElementById('html-player');
+            const title = document.getElementById('player-title');
+            const desc = document.getElementById('player-desc');
+            const uploader = document.getElementById('player-uploader-name');
+            const avatar = document.getElementById('player-uploader-avatar');
+            const likesCount = document.getElementById('likes-count');
+
+            player.src = video.url;
+            title.innerText = video.title;
+            desc.innerText = video.description || 'Sem descrição.';
+            uploader.innerText = video.uploaderName || 'Uploader';
+            avatar.innerText = video.uploaderName ? video.uploaderName[0].toUpperCase() : 'U';
+            likesCount.innerText = video.likes || 0;
+
+            // Incrementa view (simples)
+            await window.firestoreHelpers.updateDoc(window.firestoreHelpers.doc(window.db, 'videos', id), {
+                views: window.firestoreHelpers.increment(1)
+            });
+
+            updatePlayerUI();
+            loadRecommended();
+            renderEditButtons();
+            updateFollowButton();
+            updateLikeButton();
+            
+            player.play();
+            state.isPlaying = true;
+            updatePlayButton();
+            
+            // Histórico simples na URL
+            window.location.hash = `player/${id}`;
+        }
+
+        function setupPlayerListeners() {
+            const player = document.getElementById('html-player');
+            const progress = document.getElementById('progress-bar');
+            const time = document.getElementById('time-display');
+
+            player.ontimeupdate = () => {
+                const perc = (player.currentTime / player.duration) * 100;
+                progress.style.width = perc + '%';
+                time.innerText = `${formatTime(player.currentTime)} / ${formatTime(player.duration || 0)}`;
+            };
+
+            player.onended = () => {
+                state.isPlaying = false;
+                updatePlayButton();
+            };
+
+            // Teclas de atalho
+            window.addEventListener('keydown', (e) => {
+                if (document.getElementById('page-player').classList.contains('active')) {
+                    if (e.code === 'Space') { e.preventDefault(); togglePlay(); }
+                    if (e.code === 'ArrowRight') skipTime(10);
+                    if (e.code === 'ArrowLeft') skipTime(-10);
+                }
+            });
+        }
+
+        function togglePlay() {
+            const player = document.getElementById('html-player');
+            if (player.paused) {
+                player.play();
+                state.isPlaying = true;
+            } else {
+                player.pause();
+                state.isPlaying = false;
+            }
+            updatePlayButton();
+        }
+
+        function updatePlayButton() {
+            const btn = document.getElementById('play-btn');
+            btn.innerHTML = state.isPlaying ? '<i class="fas fa-pause"></i>' : '<i class="fas fa-play"></i>';
+        }
+
+        function skipTime(seconds) {
+            const player = document.getElementById('html-player');
+            player.currentTime += seconds;
+        }
+
+        function seekVideo(e) {
+            const player = document.getElementById('html-player');
+            const container = document.getElementById('progress-container');
+            const rect = container.getBoundingClientRect();
+            const pos = (e.clientX || e.touches[0].clientX) - rect.left;
+            const perc = pos / rect.width;
+            player.currentTime = perc * player.duration;
+        }
+
+        function changePlaybackSpeed() {
+            const player = document.getElementById('html-player');
+            const speeds = [1, 1.25, 1.5, 2];
+            let idx = speeds.indexOf(state.currentSpeed);
+            idx = (idx + 1) % speeds.length;
+            state.currentSpeed = speeds[idx];
+            player.playbackRate = state.currentSpeed;
+            document.getElementById('speed-btn').innerText = state.currentSpeed + 'x';
+        }
+
+        function toggleFullscreen() {
+            const player = document.getElementById('html-player');
+            if (player.requestFullscreen) player.requestFullscreen();
+            else if (player.webkitRequestFullscreen) player.webkitRequestFullscreen();
+        }
+
+        // Interações (Like, Follow, etc)
+        async function toggleLike() {
+            if (!state.currentUser) return navigateTo('auth');
+            const id = state.currentVideoId;
+            const vidRef = window.firestoreHelpers.doc(window.db, 'videos', id);
+            const isLiked = state.currentVideoData.likedBy && state.currentVideoData.likedBy.includes(state.currentUser.uid);
+
+            try {
+                if (isLiked) {
+                    await window.firestoreHelpers.updateDoc(vidRef, {
+                        likes: window.firestoreHelpers.increment(-1),
+                        likedBy: window.firestoreHelpers.arrayRemove(state.currentUser.uid)
+                    });
+                } else {
+                    await window.firestoreHelpers.updateDoc(vidRef, {
+                        likes: window.firestoreHelpers.increment(1),
+                        likedBy: window.firestoreHelpers.arrayUnion(state.currentUser.uid)
+                    });
+                }
+                // Recarrega dados do vídeo
+                const updated = await window.firestoreHelpers.getDocs(window.firestoreHelpers.query(window.firestoreHelpers.collection(window.db, 'videos'), window.firestoreHelpers.where('__name__', '==', id)));
+                state.currentVideoData = { id: updated.docs[0].id, ...updated.docs[0].data() };
+                document.getElementById('likes-count').innerText = state.currentVideoData.likes;
+                updateLikeButton();
+            } catch (e) { console.error(e); }
+        }
+
+        function updateLikeButton() {
+            const btn = document.getElementById('btn-like');
+            const isLiked = state.currentVideoData.likedBy && state.currentVideoData.likedBy.includes(state.currentUser?.uid);
+            btn.classList.toggle('text-yt-brand', isLiked);
+        }
+
+        async function toggleFollow() {
+            if (!state.currentUser) return navigateTo('auth');
+            const targetId = state.currentVideoData.uploaderId;
+            if (targetId === state.currentUser.uid) return showToast('Você não pode se seguir', 'info');
+
+            const isFollowing = state.following.includes(targetId);
+            const followQ = window.firestoreHelpers.query(
+                window.firestoreHelpers.collection(window.db, 'follows'),
+                window.firestoreHelpers.where('followerId', '==', state.currentUser.uid),
+                window.firestoreHelpers.where('followedId', '==', targetId)
+            );
+
+            try {
+                if (isFollowing) {
+                    const snap = await window.firestoreHelpers.getDocs(followQ);
+                    snap.forEach(d => window.firestoreHelpers.deleteDoc(d.ref));
+                    state.following = state.following.filter(id => id !== targetId);
+                } else {
+                    await window.firestoreHelpers.addDoc(window.firestoreHelpers.collection(window.db, 'follows'), {
+                        followerId: state.currentUser.uid,
+                        followedId: targetId,
+                        createdAt: window.firestoreHelpers.serverTimestamp()
+                    });
+                    state.following.push(targetId);
+                }
+                updateFollowButton();
+                showToast(isFollowing ? 'Inscrição cancelada' : 'Inscrição realizada!');
+            } catch (e) { console.error(e); }
+        }
+
+        async function loadFollowing() {
+            const q = window.firestoreHelpers.query(
+                window.firestoreHelpers.collection(window.db, 'follows'),
+                window.firestoreHelpers.where('followerId', '==', state.currentUser.uid)
+            );
+            const snap = await window.firestoreHelpers.getDocs(q);
+            state.following = snap.docs.map(d => d.data().followedId);
+            updateFollowButton();
+        }
+
+        function updateFollowButton() {
+            const btn = document.getElementById('btn-follow');
+            const text = document.getElementById('btn-follow-text');
+            if (!btn) return;
+
+            const isFollowing = state.following.includes(state.currentVideoData?.uploaderId);
+            if (isFollowing) {
+                btn.className = "bg-gray-200 dark:bg-yt-darkHover text-gray-500 px-6 py-2.5 rounded-full font-bold text-sm flex items-center gap-2";
+                text.innerText = "Inscrito";
+            } else {
+                btn.className = "bg-white text-black px-6 py-2.5 rounded-full font-bold text-sm hover:bg-gray-200 transition active:scale-95 flex items-center gap-2";
+                text.innerText = "Inscrever-se";
+            }
+        }
+
+        // Pesquisa
+        function handleSearchInput(val) {
+            state.currentSearch = val;
+            if (!val) clearSearch();
+        }
+
+        function handleSearch() {
+            if (!state.currentSearch) return;
+            document.getElementById('search-indicator').classList.remove('hidden');
+            document.getElementById('search-indicator-text').innerText = `Resultados para: "${state.currentSearch}"`;
+            renderVideoGrid();
+            navigateTo('home');
+        }
+
+        function clearSearch() {
+            state.currentSearch = '';
+            document.getElementById('search-input').value = '';
+            document.getElementById('search-indicator').classList.add('hidden');
+            renderVideoGrid();
+        }
+
+        // Upload
+        function toggleUploadModal(show) {
+            if (show && !state.currentUser) return navigateTo('auth');
+            const modal = document.getElementById('modal-upload');
+            modal.classList.toggle('hidden', !show);
+            if (show) {
+                document.getElementById('up-url').value = '';
+                document.getElementById('up-title').value = '';
+                document.getElementById('up-desc').value = '';
+                document.querySelectorAll('.category-checkbox').forEach(c => c.checked = false);
+                document.getElementById('thumbnail-preview').innerHTML = '<div class="text-center"><i class="fas fa-image text-5xl text-gray-600 mb-2"></i><p class="text-xs text-gray-500">Pré-visualização da thumbnail</p></div>';
+            }
+        }
+
+        function previewThumbnail(url) {
+            const preview = document.getElementById('thumbnail-preview');
+            if (url && (url.includes('.mp4') || url.includes('.webm') || url.includes('.mov'))) {
+                preview.innerHTML = `<video class="w-full h-full object-cover" src="${url}#t=1"></video>`;
+            }
+        }
+
+        async function handleUpload() {
+            const url = document.getElementById('up-url').value;
+            const title = document.getElementById('up-title').value;
+            const desc = document.getElementById('up-desc').value;
+            const selectedCats = Array.from(document.querySelectorAll('.category-checkbox:checked')).map(c => c.value);
+
+            if (!url || !title || selectedCats.length === 0) return showToast('Preencha os campos obrigatórios', 'error');
+
+            try {
+                await window.firestoreHelpers.addDoc(window.firestoreHelpers.collection(window.db, 'videos'), {
+                    url, title, description: desc,
+                    categories: selectedCats,
+                    uploaderId: state.currentUser.uid,
+                    uploaderName: state.currentUser.displayName,
+                    views: 0, likes: 0, likedBy: [],
+                    createdAt: window.firestoreHelpers.serverTimestamp()
+                });
+                showToast('Vídeo publicado!');
+                toggleUploadModal(false);
+                loadVideos();
+            } catch (e) { showToast('Erro ao publicar: ' + e.message, 'error'); }
+        }
+
+        // Editar/Deletar (Dono do Vídeo)
+        function renderEditButtons() {
+            const container = document.getElementById('player-edit-buttons');
+            if (state.currentUser && state.currentVideoData.uploaderId === state.currentUser.uid) {
+                container.innerHTML = `
+                    <button onclick="toggleEditModal(true)" class="p-2 rounded-full hover:bg-gray-200 dark:hover:bg-yt-darkHover transition"><i class="fas fa-edit"></i></button>
+                `;
+                container.classList.remove('hidden');
+            } else {
+                container.classList.add('hidden');
+            }
+        }
+
+        function toggleEditModal(show) {
+            const modal = document.getElementById('modal-edit-video');
+            modal.classList.toggle('hidden', !show);
+            if (show) {
+                document.getElementById('edit-video-id').value = state.currentVideoId;
+                document.getElementById('edit-title').value = state.currentVideoData.title;
+                document.getElementById('edit-desc').value = state.currentVideoData.description || '';
+                document.querySelectorAll('[id^="edit-cat-"]').forEach(c => {
+                    c.checked = state.currentVideoData.categories.includes(c.value);
+                });
+            }
+        }
+
+        async function saveEditVideo() {
+            const id = document.getElementById('edit-video-id').value;
+            const title = document.getElementById('edit-title').value;
+            const desc = document.getElementById('edit-desc').value;
+            const cats = Array.from(document.querySelectorAll('[id^="edit-cat-"]:checked')).map(c => c.value);
+
+            try {
+                await window.firestoreHelpers.updateDoc(window.firestoreHelpers.doc(window.db, 'videos', id), {
+                    title, description: desc, categories: cats
+                });
+                showToast('Alterações salvas!');
+                toggleEditModal(false);
+                loadVideos();
+                openVideo(id); // Recarrega UI do player
+            } catch (e) { showToast('Erro ao salvar', 'error'); }
+        }
+
+        async function deleteVideo() {
+            if (!confirm('Deseja realmente excluir este vídeo permanentemente?')) return;
+            try {
+                await window.firestoreHelpers.deleteDoc(window.firestoreHelpers.doc(window.db, 'videos', state.currentVideoId));
+                showToast('Vídeo excluído');
+                toggleEditModal(false);
+                loadVideos();
+                navigateTo('home');
+            } catch (e) { showToast('Erro ao excluir', 'error'); }
+        }
+
+        // Helpers e Diversos
+        function toggleSidebar() {
+            const sidebar = document.getElementById('sidebar');
+            const overlay = document.getElementById('sidebar-overlay');
+            state.sidebarOpen = !state.sidebarOpen;
+            sidebar.style.transform = state.sidebarOpen ? 'translateX(0)' : 'translateX(-100%)';
+            overlay.classList.toggle('hidden', !state.sidebarOpen);
+            overlay.style.opacity = state.sidebarOpen ? '1' : '0';
+        }
+
+        function formatTime(s) {
+            const h = Math.floor(s / 3600);
+            const m = Math.floor((s % 3600) / 60);
+            const sec = Math.floor(s % 60);
+            if (h > 0) return `${h}:${m.toString().padStart(2, '0')}:${sec.toString().padStart(2, '0')}`;
+            return `${m}:${sec.toString().padStart(2, '0')}`;
+        }
+
+        function formatDate(ts) {
+            if (!ts) return 'Agora';
+            const d = ts.toDate ? ts.toDate() : new Date(ts);
+            return d.toLocaleDateString('pt-BR', { day: 'numeric', month: 'short' });
+        }
+
+        function showToast(msg, type = 'success') {
+            const toast = document.getElementById('toast');
+            const icon = document.getElementById('toast-icon');
+            document.getElementById('toast-msg').innerText = msg;
+            if (type === 'error') icon.className = 'fas fa-exclamation-circle text-red-400';
+            else if (type === 'info') icon.className = 'fas fa-info-circle text-blue-400';
+            else icon.className = 'fas fa-check-circle text-green-400';
+            
+            toast.classList.remove('opacity-0', 'translate-y-10', 'pointer-events-none');
+            toast.style.opacity = '1';
+            toast.style.transform = 'translateY(0)';
+            clearTimeout(toast._timeout);
+            toast._timeout = setTimeout(() => {
+                toast.style.opacity = '0';
+                toast.style.transform = 'translateY(10px)';
+                setTimeout(() => toast.classList.add('pointer-events-none'), 400);
+            }, 3000);
+        }
+
+        function loadRecommended() {
+            const list = document.getElementById('recommended-list');
+            const recs = state.allVideos.filter(v => v.id !== state.currentVideoId).slice(0, 10);
+            list.innerHTML = `<h3 class="font-bold mb-4 px-3 sm:px-0">Recomendados</h3>` + recs.map(v => `
+                <div class="flex gap-3 mb-4 cursor-pointer group" onclick="openVideo('${v.id}')">
+                    <div class="w-40 aspect-video bg-gray-200 dark:bg-yt-darkHover rounded-lg overflow-hidden flex-shrink-0">
+                        <video class="video-thumbnail" src="${v.url}#t=1"></video>
+                    </div>
+                    <div class="min-w-0">
+                        <h4 class="text-sm font-bold line-clamp-2 leading-tight group-hover:text-yt-brand transition-colors">${v.title}</h4>
+                        <p class="text-[11px] text-gray-500 mt-1">${v.uploaderName || 'Uploader'}</p>
+                        <p class="text-[10px] text-gray-400">${v.views || 0} visualizações</p>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        // Inicialização
+        window.onload = init;
+        window.addEventListener('hashchange', () => {
+            const hash = window.location.hash.replace('#', '').split('/')[0];
+            if (hash === 'player') {
+                const videoId = window.location.hash.split('/')[1];
+                if (videoId) openVideo(videoId);
+            } else if (hash && document.getElementById(`page-${hash}`)) {
+                navigateTo(hash);
+            }
+        });
+    </script>
+</body>
+</html>
